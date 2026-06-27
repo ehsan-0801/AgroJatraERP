@@ -4,8 +4,7 @@
  *   npm run seed
  *
  * Accounts (password: password123):
- *   super@agrojatra.com        → Super Admin
- *   admin@agrojatra.com        → Admin
+ *   admin@agrojatra.com        → Admin (full access)
  *   inventory@agrojatra.com    → Inventory Manager
  *   sales@agrojatra.com        → Sales Manager
  *   accountant@agrojatra.com   → Accountant
@@ -45,13 +44,12 @@ async function main() {
                select 'AgroJatra Demo Store','+880 1700-000000','hello@agrojatra.com','Dhaka, Bangladesh'
                where not exists (select 1 from public.company)`);
 
-  const superId = await getOrCreateUser('super@agrojatra.com', 'Super Admin', 'super_admin');
-  const adminId = await getOrCreateUser('admin@agrojatra.com', 'Demo Admin', 'admin');
+  await getOrCreateUser('admin@agrojatra.com', 'Demo Admin', 'admin');
   const invId = await getOrCreateUser('inventory@agrojatra.com', 'Inventory Manager', 'inventory_manager');
   const salesId = await getOrCreateUser('sales@agrojatra.com', 'Sales Manager', 'sales_manager');
   await getOrCreateUser('accountant@agrojatra.com', 'Accountant', 'accountant');
   await getOrCreateUser('viewer@agrojatra.com', 'Viewer', 'viewer');
-  console.log('  · company + 6 role users');
+  console.log('  · company + 5 role users');
 
   // wipe data
   for (const t of ['sales', 'purchases', 'products', 'categories', 'customers', 'suppliers', 'activity_logs']) {
@@ -153,8 +151,8 @@ async function main() {
   console.log('  · 8 purchases, 16 sales');
 
   console.log('\n✅ Seed complete. Log in (password: password123):');
-  console.log('   super@agrojatra.com · admin@agrojatra.com · inventory@agrojatra.com');
-  console.log('   sales@agrojatra.com · accountant@agrojatra.com · viewer@agrojatra.com');
+  console.log('   admin@agrojatra.com · inventory@agrojatra.com · sales@agrojatra.com');
+  console.log('   accountant@agrojatra.com · viewer@agrojatra.com');
   await pool.end();
 }
 

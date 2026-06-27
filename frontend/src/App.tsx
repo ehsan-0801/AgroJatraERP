@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { BrandSplash } from '@/components/Loader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ProtectedRoute, RequirePermission } from '@/components/layout/ProtectedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
@@ -9,7 +10,6 @@ import { useTheme } from '@/store/theme';
 import { HomePage } from '@/pages/public/HomePage';
 import { AboutPage } from '@/pages/public/AboutPage';
 import { FeaturesPage } from '@/pages/public/FeaturesPage';
-import { PricingPage } from '@/pages/public/PricingPage';
 import { ContactPage } from '@/pages/public/ContactPage';
 // auth
 import { LoginPage } from '@/pages/auth/LoginPage';
@@ -32,6 +32,7 @@ import { SupplierDetailPage } from '@/pages/suppliers/SupplierDetailPage';
 import { PurchasesListPage, PurchaseFormPage, PurchaseDetailPage } from '@/pages/purchases/PurchasesPages';
 import { SalesListPage, SaleFormPage, SaleDetailPage } from '@/pages/sales/SalesPages';
 import { ReportsPage } from '@/pages/ReportsPage';
+import { AccountsPage } from '@/pages/AccountsPage';
 import { UsersListPage } from '@/pages/users/UsersListPage';
 import { UserFormPage } from '@/pages/users/UserFormPage';
 import { RolesPage } from '@/pages/RolesPage';
@@ -39,8 +40,15 @@ import { SettingsPage } from '@/pages/SettingsPage';
 
 export default function App() {
   const init = useAuth((s) => s.init);
+  const authLoading = useAuth((s) => s.loading);
   const theme = useTheme((s) => s.theme);
+  const [minElapsed, setMinElapsed] = useState(false);
+
   useEffect(() => { init(); useTheme.getState().setTheme(theme); /* eslint-disable-next-line */ }, []);
+  useEffect(() => { const t = setTimeout(() => setMinElapsed(true), 700); return () => clearTimeout(t); }, []);
+
+  // Branded splash on first load until auth is initialized (min 700ms so it doesn't flash).
+  if (authLoading || !minElapsed) return <BrandSplash label="Starting up" />;
 
   return (
     <Routes>
@@ -49,7 +57,6 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/features" element={<FeaturesPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/contact" element={<ContactPage />} />
       </Route>
 
@@ -93,6 +100,7 @@ export default function App() {
         <Route path="/sales/:id/edit" element={<RequirePermission module="sales" action="update"><SaleFormPage /></RequirePermission>} />
 
         <Route path="/reports" element={<RequirePermission module="reports"><ReportsPage /></RequirePermission>} />
+        <Route path="/accounts" element={<RequirePermission module="accounts"><AccountsPage /></RequirePermission>} />
 
         <Route path="/users" element={<RequirePermission module="users"><UsersListPage /></RequirePermission>} />
         <Route path="/users/new" element={<RequirePermission module="users" action="create"><UserFormPage /></RequirePermission>} />

@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import { BrandSplash } from '@/components/Loader';
 import { useAuth } from '@/store/auth';
 import { useSession } from '@/store/session';
 import type { Action, Module } from '@/lib/permissions';
@@ -9,7 +10,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const sessionLoading = useSession((s) => s.loading);
 
   if (loading || (user && sessionLoading)) {
-    return <div className="flex h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return <BrandSplash label="Loading your workspace" />;
   }
   if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;

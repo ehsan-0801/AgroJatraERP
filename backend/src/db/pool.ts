@@ -15,7 +15,20 @@ export const pool = new pg.Pool({
   connectionString: cleanUrl(env.databaseUrl),
   ssl: { rejectUnauthorized: false },
   max: 10,
+  // Keep connections warm so we don't pay a fresh TLS handshake to the
+  // Supabase DB (us-east-1) on every request after a short idle period —
+  // that handshake is what caused the occasional multi-second responses.
+  keepAlive: true,
+  idleTimeoutMillis: 60_000,
+  connectionTimeoutMillis: 15_000,
 });
+
+// Prime one connection at startup so the first request is fast, and keep at
+// least one connection alive with a lightweight periodic ping.
+pool.query('select 1').catch(() => {});
+setInterval(() => {
+  pool.query('select 1').catch(() => {});
+}, 50_000).unref();
 
 export async function query<T extends pg.QueryResultRow = pg.QueryResultRow>(
   text: string,

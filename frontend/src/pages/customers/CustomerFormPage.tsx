@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceFormPage } from '@/components/ResourceFormPage';
 
 export function CustomerFormPage() {
+  const { t } = useTranslation();
   return (
     <ResourceFormPage
       resource="customers"
-      singular="Customer"
+      singular={t('modules.customers.title')}
       listPath="/customers"
       fields={[
         { name: 'name', label: 'Name', required: true, section: 'General Information' },

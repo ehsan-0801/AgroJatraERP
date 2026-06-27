@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceListPage } from '@/components/ResourceListPage';
 import { Badge } from '@/components/ui/badge';
 import { ROLE_LABELS, type Role } from '@/lib/permissions';
@@ -6,11 +7,12 @@ import { formatDate } from '@/lib/utils';
 interface U { id: string; email: string; full_name: string | null; role: Role; status: string; created_at: string }
 
 export function UsersListPage() {
+  const { t } = useTranslation();
   return (
     <ResourceListPage<U>
-      module="users" resource="users" title="Users"
-      description="Manage team members and their roles"
-      singular="User" basePath="/users"
+      module="users" resource="users" title={t('modules.users.title')}
+      description={t('modules.users.desc')}
+      singular={t('modules.users.title')} basePath="/users"
       filters={[{ param: 'role', label: 'Role', options: (Object.keys(ROLE_LABELS) as Role[]).map((r) => ({ label: ROLE_LABELS[r], value: r })) }]}
       columns={[
         { header: 'Name', render: (u) => <div><div className="font-medium">{u.full_name || u.email}</div><div className="text-xs text-muted-foreground">{u.email}</div></div> },

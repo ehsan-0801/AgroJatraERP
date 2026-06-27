@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "migrate": "tsx src/db/migrate.ts",
     "seed": "tsx src/db/seed.ts",
-    "make-superadmin": "tsx src/db/make-superadmin.ts",
+    "make-admin": "tsx src/db/make-admin.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

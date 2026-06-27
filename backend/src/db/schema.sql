@@ -38,7 +38,7 @@ create table if not exists public.users (
   phone       text,
   avatar_url  text,
   role        text not null default 'viewer'
-              check (role in ('super_admin','admin','inventory_manager','sales_manager','accountant','viewer')),
+              check (role in ('admin','inventory_manager','sales_manager','accountant','viewer')),
   status      text not null default 'active' check (status in ('active','inactive')),
   theme       text not null default 'system',
   created_at  timestamptz not null default now(),
@@ -50,16 +50,24 @@ alter table public.users add column if not exists role text;
 alter table public.users add column if not exists status text;
 update public.users set role = 'viewer' where role is null;
 update public.users set status = 'active' where status is null;
+-- merge the former Super Admin role into Admin (single top role)
+update public.users set role = 'admin' where role = 'super_admin';
 alter table public.users alter column role set default 'viewer';
 alter table public.users alter column role set not null;
 alter table public.users alter column status set default 'active';
 alter table public.users alter column status set not null;
 do $$
 begin
-  if not exists (select 1 from pg_constraint where conname = 'users_role_chk') then
-    alter table public.users add constraint users_role_chk
-      check (role in ('super_admin','admin','inventory_manager','sales_manager','accountant','viewer'));
+  -- drop the legacy inline check (allowed super_admin) if present
+  if exists (select 1 from pg_constraint where conname = 'users_role_check') then
+    alter table public.users drop constraint users_role_check;
   end if;
+  -- (re)create the role check without super_admin
+  if exists (select 1 from pg_constraint where conname = 'users_role_chk') then
+    alter table public.users drop constraint users_role_chk;
+  end if;
+  alter table public.users add constraint users_role_chk
+    check (role in ('admin','inventory_manager','sales_manager','accountant','viewer'));
   if not exists (select 1 from pg_constraint where conname = 'users_status_chk') then
     alter table public.users add constraint users_status_chk check (status in ('active','inactive'));
   end if;

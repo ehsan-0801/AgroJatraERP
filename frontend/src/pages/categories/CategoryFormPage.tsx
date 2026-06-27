@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceFormPage } from '@/components/ResourceFormPage';
 
 export function CategoryFormPage() {
+  const { t } = useTranslation();
   return (
     <ResourceFormPage
       resource="categories"
-      singular="Category"
+      singular={t('modules.categories.title')}
       listPath="/categories"
       fields={[
         { name: 'name', label: 'Name', required: true },

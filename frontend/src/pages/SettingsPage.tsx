@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { useCan, useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const { section } = useParams();
   const navigate = useNavigate();
   const canCompany = useCan('settings', 'read');
@@ -25,7 +27,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Settings" description="Company & personal preferences" breadcrumb={[{ label: 'Settings' }]} />
+      <PageHeader title={t('modules.settings.title')} description={t('modules.settings.desc')} breadcrumb={[{ label: t('modules.settings.title') }]} />
       <Tabs active={tab} onChange={(v) => navigate(`/settings/${v}`)} tabs={tabs} />
       {tab === 'company' && canCompany && <CompanySettings />}
       {tab === 'profile' && <ProfileSettings />}

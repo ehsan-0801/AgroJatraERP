@@ -22,15 +22,27 @@ async function ensureCompany() {
                where not exists (select 1 from public.company)`);
 }
 
-/** POST /auth/register — the FIRST user becomes super_admin; others default to viewer. */
+/** POST /auth/register — the FIRST user becomes admin; others default to viewer. */
+/** GET /auth/registration-status — is self-registration still open? (only until the first user exists) */
+authRouter.get(
+  '/registration-status',
+  asyncHandler(async (_req, res) => {
+    const count = Number((await query<{ c: string }>('select count(*)::int as c from public.users')).rows[0].c);
+    res.json({ open: count === 0 });
+  }),
+);
+
 authRouter.post(
   '/register',
   asyncHandler(async (req, res) => {
     const body = registerSchema.parse(req.body);
     await ensureCompany();
 
+    // Single-organization ERP: only the very first account may self-register
+    // (it becomes the Admin). After that, an Admin creates users from /users.
     const isFirst = Number((await query<{ c: string }>('select count(*)::int as c from public.users')).rows[0].c) === 0;
-    const role = isFirst ? 'super_admin' : 'viewer';
+    if (!isFirst) throw new ApiError(403, 'Registration is closed. Please contact your administrator for an account.');
+    const role = 'admin';
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: body.email,
@@ -46,7 +58,7 @@ authRouter.post(
        on conflict (id) do update set full_name = excluded.full_name`,
       [data.user.id, body.email, body.full_name ?? null, role],
     );
-    await logActivity({ userId: data.user.id, action: 'registered', entity: 'users', entityId: data.user.id, description: `${body.email} registered as ${role}` });
+    await logActivity({ userId: data.user.id, action: 'registered', entity: 'users', entityId: data.user.id, description: `${body.email} registered as ${role} (first user)` });
 
     const { data: session, error: signInErr } = await supabaseAnon.auth.signInWithPassword({
       email: body.email,

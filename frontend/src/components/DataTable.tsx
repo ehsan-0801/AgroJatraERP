@@ -1,4 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TBody, TD, TH, THead, TR, Table } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,7 +15,7 @@ export function DataTable<T extends { id: string }>({
   columns,
   rows,
   loading,
-  empty = 'No records found',
+  empty,
   onRowClick,
   page,
   pages,
@@ -30,6 +32,8 @@ export function DataTable<T extends { id: string }>({
   total?: number;
   onPage?: (p: number) => void;
 }) {
+  const { t } = useTranslation();
+  const emptyText = empty ?? t('common.noRecords');
   return (
     <div className="space-y-3">
       <Card>
@@ -44,7 +48,15 @@ export function DataTable<T extends { id: string }>({
             </THead>
             <TBody>
               {loading ? (
-                <TR><TD colSpan={columns.length} className="py-8 text-center text-muted-foreground">Loading…</TD></TR>
+                Array.from({ length: 6 }).map((_, i) => (
+                  <TR key={`sk-${i}`}>
+                    {columns.map((c) => (
+                      <TD key={c.header} className={c.className}>
+                        <Skeleton className={cn('h-4', c.className?.includes('text-right') ? 'ml-auto w-16' : 'w-28')} />
+                      </TD>
+                    ))}
+                  </TR>
+                ))
               ) : rows?.length ? (
                 rows.map((row) => (
                   <TR
@@ -58,7 +70,7 @@ export function DataTable<T extends { id: string }>({
                   </TR>
                 ))
               ) : (
-                <TR><TD colSpan={columns.length} className="py-8 text-center text-muted-foreground">{empty}</TD></TR>
+                <TR><TD colSpan={columns.length} className="py-8 text-center text-muted-foreground">{emptyText}</TD></TR>
               )}
             </TBody>
           </Table>
@@ -67,10 +79,10 @@ export function DataTable<T extends { id: string }>({
 
       {pages !== undefined && pages > 1 && (
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Page {page} of {pages} · {total} total</span>
+          <span className="text-muted-foreground">{t('common.page')} {page} {t('common.of')} {pages} · {total} {t('common.total')}</span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled={(page ?? 1) <= 1} onClick={() => onPage?.((page ?? 1) - 1)}>Previous</Button>
-            <Button variant="outline" size="sm" disabled={(page ?? 1) >= pages} onClick={() => onPage?.((page ?? 1) + 1)}>Next</Button>
+            <Button variant="outline" size="sm" disabled={(page ?? 1) <= 1} onClick={() => onPage?.((page ?? 1) - 1)}>{t('common.previous')}</Button>
+            <Button variant="outline" size="sm" disabled={(page ?? 1) >= pages} onClick={() => onPage?.((page ?? 1) + 1)}>{t('common.next')}</Button>
           </div>
         </div>
       )}

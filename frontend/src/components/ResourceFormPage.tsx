@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,6 +57,7 @@ function AsyncOptions({ field, value, onChange }: { field: FormField; value: str
 export function ResourceFormPage<T extends Record<string, unknown>>({
   resource, singular, listPath, fields, toForm, toBody,
 }: Props<T>) {
+  const { t } = useTranslation();
   const { id } = useParams();
   const editing = !!id;
   const navigate = useNavigate();
@@ -99,13 +101,13 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
 
   const sections = Array.from(new Set(fields.map((f) => f.section ?? 'General Information')));
   const crumbs: Crumb[] = [
-    { label: singular + 's', to: listPath },
-    { label: editing ? `Edit` : 'New' },
+    { label: singular, to: listPath },
+    { label: editing ? t('common.edit') : t('common.add') },
   ];
 
   return (
     <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-6">
-      <PageHeader title={editing ? `Edit ${singular}` : `New ${singular}`} breadcrumb={crumbs} />
+      <PageHeader title={editing ? t('common.editItem', { name: singular }) : t('common.newItem', { name: singular })} breadcrumb={crumbs} />
       {sections.map((section) => (
         <Card key={section}>
           <CardHeader><CardTitle className="text-base">{section}</CardTitle></CardHeader>
@@ -143,9 +145,9 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
         </Card>
       ))}
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={() => navigate(listPath)}>Cancel</Button>
+        <Button type="button" variant="outline" onClick={() => navigate(listPath)}>{t('common.cancel')}</Button>
         <Button type="submit" disabled={create.isPending || update.isPending}>
-          {editing ? 'Save changes' : `Create ${singular}`}
+          {editing ? t('common.saveChanges') : t('common.createItem', { name: singular })}
         </Button>
       </div>
     </form>

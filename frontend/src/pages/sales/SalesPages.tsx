@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceListPage } from '@/components/ResourceListPage';
 import { TransactionDetailPage } from '@/components/TransactionDetailPage';
 import { TransactionFormPage } from '@/components/TransactionFormPage';
@@ -6,11 +7,12 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 interface Sale { id: string; invoice_no: string; customer_name: string | null; sale_date: string; total: string; paid: string }
 
 export function SalesListPage() {
+  const { t } = useTranslation();
   return (
     <ResourceListPage<Sale>
-      module="sales" resource="sales" title="Sales"
-      description="Record sales & invoices — stock is validated and deducted"
-      singular="Sale" basePath="/sales" hasDetail
+      module="sales" resource="sales" title={t('modules.sales.title')}
+      description={t('modules.sales.desc')}
+      singular={t('modules.sales.title')} basePath="/sales" hasDetail
       searchPlaceholder="Search by invoice or customer…"
       filters={[{ param: 'customer_id', label: 'Customer', optionsResource: 'customers' }]}
       exportRows={(rows) => rows.map((s) => ({ invoice: s.invoice_no, customer: s.customer_name ?? '', date: s.sale_date, total: s.total, paid: s.paid }))}

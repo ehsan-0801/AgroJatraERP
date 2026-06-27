@@ -1,47 +1,52 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  BarChart3, Boxes, Building2, FileBarChart, LayoutDashboard, LogOut, Moon, Settings,
+  BarChart3, Boxes, Building2, Calculator, FileBarChart, Home, LayoutDashboard, LogOut, Moon, Settings,
   ShieldCheck, ShoppingCart, Sun, Tags, Truck, UserCircle, Users, UsersRound,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AnimatePresence, PageTransition } from '@/components/motion';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { can, ROLE_LABELS, type Module } from '@/lib/permissions';
+import { can, type Module } from '@/lib/permissions';
 import { useAuth } from '@/store/auth';
 import { useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
 
-interface NavItem { to: string; label: string; icon: typeof LayoutDashboard; module: Module; end?: boolean }
-interface NavGroup { group?: string; items: NavItem[] }
+interface NavItem { to: string; labelKey: string; icon: typeof LayoutDashboard; module: Module; end?: boolean }
+interface NavGroup { groupKey?: string; items: NavItem[] }
 
 const NAV: NavGroup[] = [
-  { items: [{ to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, module: 'dashboard', end: true }] },
-  { group: 'Inventory', items: [
-    { to: '/products', label: 'Products', icon: Boxes, module: 'products' },
-    { to: '/categories', label: 'Categories', icon: Tags, module: 'categories' },
+  { items: [{ to: '/dashboard', labelKey: 'dashboard', icon: LayoutDashboard, module: 'dashboard', end: true }] },
+  { groupKey: 'inventory', items: [
+    { to: '/products', labelKey: 'products', icon: Boxes, module: 'products' },
+    { to: '/categories', labelKey: 'categories', icon: Tags, module: 'categories' },
   ] },
-  { group: 'CRM', items: [
-    { to: '/customers', label: 'Customers', icon: Users, module: 'customers' },
-    { to: '/suppliers', label: 'Suppliers', icon: Truck, module: 'suppliers' },
+  { groupKey: 'crm', items: [
+    { to: '/customers', labelKey: 'customers', icon: Users, module: 'customers' },
+    { to: '/suppliers', labelKey: 'suppliers', icon: Truck, module: 'suppliers' },
   ] },
-  { group: 'Transactions', items: [
-    { to: '/purchases', label: 'Purchases', icon: ShoppingCart, module: 'purchases' },
-    { to: '/sales', label: 'Sales', icon: BarChart3, module: 'sales' },
+  { groupKey: 'transactions', items: [
+    { to: '/purchases', labelKey: 'purchases', icon: ShoppingCart, module: 'purchases' },
+    { to: '/sales', labelKey: 'sales', icon: BarChart3, module: 'sales' },
   ] },
-  { group: 'Insights', items: [
-    { to: '/reports', label: 'Reports', icon: FileBarChart, module: 'reports' },
+  { groupKey: 'insights', items: [
+    { to: '/reports', labelKey: 'reports', icon: FileBarChart, module: 'reports' },
+    { to: '/accounts', labelKey: 'accounts', icon: Calculator, module: 'accounts' },
   ] },
-  { group: 'Administration', items: [
-    { to: '/users', label: 'Users', icon: UsersRound, module: 'users' },
-    { to: '/roles', label: 'Roles', icon: ShieldCheck, module: 'users' },
-    { to: '/settings', label: 'Settings', icon: Settings, module: 'settings' },
+  { groupKey: 'administration', items: [
+    { to: '/users', labelKey: 'users', icon: UsersRound, module: 'users' },
+    { to: '/roles', labelKey: 'roles', icon: ShieldCheck, module: 'users' },
+    { to: '/settings', labelKey: 'settings', icon: Settings, module: 'settings' },
   ] },
 ];
 
 export function AppLayout() {
   const { user: authUser, signOut } = useAuth();
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const user = useSession((s) => s.user);
   const sessionError = useSession((s) => s.error);
@@ -70,8 +75,8 @@ export function AppLayout() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => reload()}>Retry</Button>
-          <Button variant="outline" onClick={handleSignOut}>Log out</Button>
+          <Button onClick={() => reload()}>{t('common.retry')}</Button>
+          <Button variant="outline" onClick={handleSignOut}>{t('common.logout')}</Button>
         </div>
       </div>
     );
@@ -85,25 +90,21 @@ export function AppLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
       <aside className="hidden w-64 flex-col border-r bg-card md:flex">
-        <div className="flex h-16 items-center gap-2 border-b px-5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-base font-bold text-primary-foreground">A</div>
-          <div>
-            <p className="text-sm font-semibold leading-tight">AgroJatra ERP</p>
-            <p className="text-[10px] text-muted-foreground">Everything in one place</p>
-          </div>
+        <div className="flex h-16 items-center border-b px-5">
+          <NavLink to="/dashboard"><Logo className="h-8" /></NavLink>
         </div>
 
         <nav className="flex-1 space-y-4 overflow-y-auto p-3">
           {groups.map((g, gi) => (
             <div key={gi} className="space-y-1">
-              {g.group && <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{g.group}</p>}
-              {g.items.map(({ to, label, icon: Icon, end }) => (
+              {g.groupKey && <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t(`nav.groups.${g.groupKey}`)}</p>}
+              {g.items.map(({ to, labelKey, icon: Icon, end }) => (
                 <NavLink key={to} to={to} end={end}
                   className={({ isActive }) => cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                     isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
                   )}>
-                  <Icon className="h-4 w-4" /> {label}
+                  <Icon className="h-4 w-4" /> {t(`nav.${labelKey}`)}
                 </NavLink>
               ))}
             </div>
@@ -112,19 +113,23 @@ export function AppLayout() {
 
         <div className="space-y-1 border-t p-3">
           <NavLink to="/profile" className={({ isActive }) => cn('flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium', isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-foreground')}>
-            <UserCircle className="h-4 w-4" /> Profile
+            <UserCircle className="h-4 w-4" /> {t('nav.profile')}
           </NavLink>
           <Button variant="ghost" className="w-full justify-start gap-3" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4" /> Logout
+            <LogOut className="h-4 w-4" /> {t('common.logout')}
           </Button>
         </div>
       </aside>
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center justify-between border-b bg-card px-6">
-          <div className="md:hidden font-semibold">AgroJatra ERP</div>
+          <div className="md:hidden"><Logo className="h-7" /></div>
           <div className="ml-auto flex items-center gap-3">
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{ROLE_LABELS[role]}</span>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/')} title={t('publicNav.home')} aria-label={t('publicNav.home')}>
+              <Home className="h-4 w-4" />
+            </Button>
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{t(`roles.${role}`)}</span>
+            <LanguageSwitcher />
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>

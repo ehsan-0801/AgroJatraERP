@@ -1,15 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceListPage } from '@/components/ResourceListPage';
 
 interface Supplier { id: string; name: string; email: string | null; phone: string | null; address: string | null }
 
 export function SuppliersListPage() {
+  const { t } = useTranslation();
   return (
     <ResourceListPage<Supplier>
       module="suppliers"
       resource="suppliers"
-      title="Suppliers"
-      description="Manage your supply-chain partners"
-      singular="Supplier"
+      title={t('modules.suppliers.title')}
+      description={t('modules.suppliers.desc')}
+      singular={t('modules.suppliers.title')}
       basePath="/suppliers"
       hasDetail
       exportRows={(rows) => rows.map((s) => ({ name: s.name, email: s.email ?? '', phone: s.phone ?? '', address: s.address ?? '' }))}

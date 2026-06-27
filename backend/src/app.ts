@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/error.js';
+import { accountsRouter } from './routes/accounts.routes.js';
 import { activityRouter } from './routes/activity.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { categoriesRouter } from './routes/categories.routes.js';
@@ -37,6 +38,7 @@ export function createApp() {
   api.use('/purchases', purchasesRouter);
   api.use('/sales', salesRouter);
   api.use('/reports', reportsRouter);
+  api.use('/accounts', accountsRouter);
   api.use('/users', usersRouter);
   api.use('/settings', settingsRouter);
   api.use('/activity', activityRouter);

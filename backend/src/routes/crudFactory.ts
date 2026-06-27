@@ -54,18 +54,19 @@ export function crudRouter(cfg: CrudConfig): Router {
       }
       const where = clauses.join(' and ');
 
-      const total = Number(
-        (await query<{ count: string }>(`select count(*)::int as count from ${T} ${alias} where ${where}`, params)).rows[0].count,
-      );
+      // Single round-trip: the window count returns the full match count
+      // (computed before LIMIT), so we avoid a separate COUNT query.
       params.push(p.limit, p.offset);
-      const { rows } = await query(
-        `select ${alias}.*${cfg.selectExtra ? ', ' + cfg.selectExtra : ''}
+      const { rows } = await query<Record<string, unknown>>(
+        `select ${alias}.*${cfg.selectExtra ? ', ' + cfg.selectExtra : ''}, count(*) over()::int as __total
          from ${T} ${alias} ${cfg.joins ?? ''}
          where ${where} order by ${alias}.${p.sort} ${p.order}
          limit $${params.length - 1} offset $${params.length}`,
         params,
       );
-      res.json({ data: rows, page: p.page, limit: p.limit, total, pages: Math.ceil(total / p.limit) });
+      const total = rows.length ? Number(rows[0].__total) : 0;
+      const data = rows.map(({ __total, ...rest }) => rest);
+      res.json({ data, page: p.page, limit: p.limit, total, pages: Math.ceil(total / p.limit) });
     }),
   );
 

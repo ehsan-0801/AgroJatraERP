@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Download } from 'lucide-react';
 import { useState } from 'react';
@@ -19,6 +20,7 @@ const ALL = [
 ];
 
 export function ReportsPage() {
+  const { t } = useTranslation();
   const role = useRole();
   const available = ALL.filter((r) => canViewReport(role, r.key));
   const [active, setActive] = useState(available[0]?.key ?? 'products');
@@ -33,8 +35,8 @@ export function ReportsPage() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Reports"
-        description="Analyze and export your business data"
+        title={t('modules.reports.title')}
+        description={t('modules.reports.desc')}
         breadcrumb={[{ label: 'Reports' }]}
         actions={canExport(role) && <Button variant="outline" className="gap-2" disabled={!rows.length} onClick={() => downloadCsv(rows, `${active}-report.csv`)}><Download className="h-4 w-4" /> Export CSV</Button>}
       />

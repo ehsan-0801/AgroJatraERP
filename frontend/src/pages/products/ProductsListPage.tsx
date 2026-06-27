@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ResourceListPage } from '@/components/ResourceListPage';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
@@ -8,13 +9,14 @@ interface Product {
 }
 
 export function ProductsListPage() {
+  const { t } = useTranslation();
   return (
     <ResourceListPage<Product>
       module="products"
       resource="products"
-      title="Products"
-      description="Manage your inventory catalog"
-      singular="Product"
+      title={t('modules.products.title')}
+      description={t('modules.products.desc')}
+      singular={t('modules.products.title')}
       basePath="/products"
       hasDetail
       searchPlaceholder="Search by name, SKU, barcode…"

@@ -13,7 +13,7 @@ import { parsePaging } from '../utils/parsePaging.js';
 export const usersRouter = Router();
 usersRouter.use(requireAuth, loadUser);
 
-const roleEnum = z.enum(['super_admin', 'admin', 'inventory_manager', 'sales_manager', 'accountant', 'viewer']);
+const roleEnum = z.enum(['admin', 'inventory_manager', 'sales_manager', 'accountant', 'viewer']);
 
 // GET /users/roles — the permission matrix (for the Roles view)
 usersRouter.get('/roles', requirePermission('users', 'read'), asyncHandler(async (_req, res) => {
@@ -70,8 +70,8 @@ usersRouter.patch('/:id', requirePermission('users', 'update'), asyncHandler(asy
     status: z.enum(['active', 'inactive']).optional(),
   }).parse(req.body) as Record<string, unknown>;
 
-  // Guard: don't let a super admin demote/deactivate themselves into lockout
-  if (req.params.id === req.user!.id && (body.role && body.role !== 'super_admin' || body.status === 'inactive')) {
+  // Guard: don't let an admin demote/deactivate themselves into lockout
+  if (req.params.id === req.user!.id && ((body.role && body.role !== 'admin') || body.status === 'inactive')) {
     throw new ApiError(400, 'You cannot change your own role or deactivate yourself');
   }
   const cols = ['full_name', 'phone', 'role', 'status'].filter((c) => body[c] !== undefined);
@@ -89,9 +89,9 @@ usersRouter.delete('/:id', requirePermission('users', 'delete'), asyncHandler(as
   if (req.params.id === req.user!.id) throw new ApiError(400, 'You cannot delete your own account');
   const target = (await query('select role from public.users where id=$1', [req.params.id])).rows[0];
   if (!target) throw new ApiError(404, 'Not found');
-  if (target.role === 'super_admin') {
-    const others = Number((await query(`select count(*)::int as c from public.users where role='super_admin' and id<>$1`, [req.params.id])).rows[0].c);
-    if (others === 0) throw new ApiError(400, 'Cannot delete the last super admin');
+  if (target.role === 'admin') {
+    const others = Number((await query(`select count(*)::int as c from public.users where role='admin' and id<>$1`, [req.params.id])).rows[0].c);
+    if (others === 0) throw new ApiError(400, 'Cannot delete the last admin');
   }
   await supabaseAdmin.auth.admin.deleteUser(req.params.id).catch(() => {});
   await query('delete from public.users where id=$1', [req.params.id]);

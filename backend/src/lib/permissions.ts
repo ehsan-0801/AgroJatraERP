@@ -5,7 +5,6 @@
 // ============================================================================
 
 export type Role =
-  | 'super_admin'
   | 'admin'
   | 'inventory_manager'
   | 'sales_manager'
@@ -13,7 +12,6 @@ export type Role =
   | 'viewer';
 
 export const ROLES: Role[] = [
-  'super_admin',
   'admin',
   'inventory_manager',
   'sales_manager',
@@ -22,7 +20,6 @@ export const ROLES: Role[] = [
 ];
 
 export const ROLE_LABELS: Record<Role, string> = {
-  super_admin: 'Super Admin',
   admin: 'Admin',
   inventory_manager: 'Inventory Manager',
   sales_manager: 'Sales Manager',
@@ -39,6 +36,7 @@ export type Module =
   | 'purchases'
   | 'sales'
   | 'reports'
+  | 'accounts'
   | 'users'
   | 'settings';
 
@@ -51,17 +49,19 @@ const NONE: Action[] = [];
 
 // Module → Role → allowed actions. Mirrors the spec's permission matrix.
 const MATRIX: Record<Module, Record<Role, Action[]>> = {
-  dashboard: { super_admin: R, admin: R, inventory_manager: R, sales_manager: R, accountant: R, viewer: R },
-  products:  { super_admin: ALL, admin: ALL, inventory_manager: CE,  sales_manager: R,   accountant: R, viewer: R },
-  categories:{ super_admin: ALL, admin: ALL, inventory_manager: CE,  sales_manager: R,   accountant: R, viewer: R },
-  customers: { super_admin: ALL, admin: ALL, inventory_manager: R,   sales_manager: ALL, accountant: R, viewer: R },
-  suppliers: { super_admin: ALL, admin: ALL, inventory_manager: ALL, sales_manager: R,   accountant: R, viewer: R },
-  purchases: { super_admin: ALL, admin: ALL, inventory_manager: ALL, sales_manager: R,   accountant: R, viewer: R },
-  sales:     { super_admin: ALL, admin: ALL, inventory_manager: R,   sales_manager: ALL, accountant: R, viewer: R },
-  reports:   { super_admin: R, admin: R, inventory_manager: R, sales_manager: R, accountant: R, viewer: R },
-  users:     { super_admin: ALL, admin: NONE, inventory_manager: NONE, sales_manager: NONE, accountant: NONE, viewer: NONE },
-  // settings: super admin full; admin limited (read + update company); others none
-  settings:  { super_admin: ALL, admin: ['read', 'update'], inventory_manager: NONE, sales_manager: NONE, accountant: NONE, viewer: NONE },
+  dashboard: { admin: R,   inventory_manager: R,   sales_manager: R,   accountant: R, viewer: R },
+  products:  { admin: ALL, inventory_manager: CE,  sales_manager: R,   accountant: R, viewer: R },
+  categories:{ admin: ALL, inventory_manager: CE,  sales_manager: R,   accountant: R, viewer: R },
+  customers: { admin: ALL, inventory_manager: R,   sales_manager: ALL, accountant: R, viewer: R },
+  suppliers: { admin: ALL, inventory_manager: ALL, sales_manager: R,   accountant: R, viewer: R },
+  purchases: { admin: ALL, inventory_manager: ALL, sales_manager: R,   accountant: R, viewer: R },
+  sales:     { admin: ALL, inventory_manager: R,   sales_manager: ALL, accountant: R, viewer: R },
+  reports:   { admin: R,   inventory_manager: R,   sales_manager: R,   accountant: R, viewer: R },
+  // accounts: financial summary + ledger — for accountants and admins
+  accounts:  { admin: R,   inventory_manager: NONE, sales_manager: NONE, accountant: R, viewer: NONE },
+  // admin has full control of the system, users and settings
+  users:     { admin: ALL, inventory_manager: NONE, sales_manager: NONE, accountant: NONE, viewer: NONE },
+  settings:  { admin: ALL, inventory_manager: NONE, sales_manager: NONE, accountant: NONE, viewer: NONE },
 };
 
 /** Can `role` perform `action` on `module`? */
@@ -71,7 +71,6 @@ export function can(role: Role, module: Module, action: Action): boolean {
 
 /** Which report categories a role may view. */
 export const REPORT_ACCESS: Record<Role, string[]> = {
-  super_admin: ['products', 'customers', 'suppliers', 'purchases', 'sales'],
   admin: ['products', 'customers', 'suppliers', 'purchases', 'sales'],
   inventory_manager: ['products', 'suppliers', 'purchases'],
   sales_manager: ['sales', 'customers'],

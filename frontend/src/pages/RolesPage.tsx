@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Check, Minus } from 'lucide-react';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,9 +28,10 @@ function cell(role: Role, module: Module) {
 }
 
 export function RolesPage() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-5">
-      <PageHeader title="Roles & Permissions" description="What each system role can do" breadcrumb={[{ label: 'Roles' }]} />
+      <PageHeader title={t('modules.roles.title')} description={t('modules.roles.desc')} breadcrumb={[{ label: t('nav.roles') }]} />
       <Card>
         <CardContent className="overflow-x-auto p-0">
           <table className="w-full text-sm">
