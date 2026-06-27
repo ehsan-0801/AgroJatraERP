@@ -84,11 +84,13 @@ create table if not exists public.categories (
   organization_id uuid not null references public.organizations(id) on delete cascade,
   name            text not null,
   description     text,
+  image_url       text,
   created_by      uuid references auth.users(id) on delete set null,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
   deleted_at      timestamptz
 );
+alter table public.categories add column if not exists image_url text;
 create unique index if not exists uq_categories_org_name on public.categories(organization_id, lower(name)) where deleted_at is null;
 create index if not exists idx_categories_org on public.categories(organization_id) where deleted_at is null;
 

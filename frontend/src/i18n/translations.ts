@@ -177,6 +177,9 @@ export const en = {
     roles: { title: 'Roles & Permissions', desc: 'What each system role can do' },
     settings: { title: 'Settings', desc: 'Organization & personal preferences' },
   },
+  image: {
+    upload: 'Upload image', change: 'Change image', uploading: 'Uploading…', hint: 'PNG or JPG. Uploaded when you save.',
+  },
   onboarding: {
     title: 'Create your organization', subtitle: 'Set up your workspace to get started. You can invite up to 5 members.',
     name: 'Organization name', namePlaceholder: 'e.g. Bengal Mart', phone: 'Phone', email: 'Email', address: 'Address',
@@ -373,6 +376,9 @@ export const bn: typeof en = {
     users: { title: 'সদস্য', desc: 'আপনার প্রতিষ্ঠানের সদস্য ও তাদের ভূমিকা পরিচালনা করুন' },
     roles: { title: 'ভূমিকা ও অনুমতি', desc: 'প্রতিটি সিস্টেম ভূমিকা কী করতে পারে' },
     settings: { title: 'সেটিংস', desc: 'প্রতিষ্ঠান ও ব্যক্তিগত পছন্দ' },
+  },
+  image: {
+    upload: 'ছবি আপলোড করুন', change: 'ছবি পরিবর্তন করুন', uploading: 'আপলোড হচ্ছে…', hint: 'PNG বা JPG। সংরক্ষণ করলে আপলোড হবে।',
   },
   onboarding: {
     title: 'আপনার প্রতিষ্ঠান তৈরি করুন', subtitle: 'শুরু করতে আপনার ওয়ার্কস্পেস সেট করুন। আপনি সর্বোচ্চ ৫ জন সদস্য যোগ করতে পারবেন।',

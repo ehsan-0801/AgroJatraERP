@@ -11,6 +11,7 @@ export function CategoryFormPage() {
       fields={[
         { name: 'name', label: 'Name', required: true },
         { name: 'description', label: 'Description', type: 'textarea' },
+        { name: 'image_url', label: 'Category Image', type: 'image', full: true },
       ]}
     />
   );

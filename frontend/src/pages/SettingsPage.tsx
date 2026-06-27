@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { ImageUpload } from '@/components/ImageUpload';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs } from '@/components/ui/tabs';
 import { api } from '@/lib/api';
+import { uploadImage } from '@/lib/cloudinary';
 import { useCan, useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
 
@@ -37,25 +39,49 @@ export function SettingsPage() {
 }
 
 function CompanySettings() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
+  const reload = useSession((s) => s.load);
   const canEdit = useCan('settings', 'update');
   const { data } = useQuery({ queryKey: ['company'], queryFn: () => api.get<{ data: any }>('/settings/company') });
   const [f, setF] = useState<Record<string, string>>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   useEffect(() => { if (data?.data) setF(data.data); }, [data]);
   const save = useMutation({
     mutationFn: (body: unknown) => api.patch('/settings/company', body),
-    onSuccess: () => { toast.success('Company settings saved'); qc.invalidateQueries({ queryKey: ['company'] }); },
+    onSuccess: () => { toast.success('Organization settings saved'); qc.invalidateQueries({ queryKey: ['company'] }); reload({ silent: true }); },
     onError: (e: Error) => toast.error(e.message),
   });
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setF((s) => ({ ...s, [k]: e.target.value }));
-  const fields: [string, string][] = [['name', 'Company Name'], ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['currency', 'Currency'], ['timezone', 'Timezone'], ['language', 'Language'], ['logo_url', 'Logo URL']];
+  const fields: [string, string][] = [['name', 'Organization Name'], ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['currency', 'Currency'], ['timezone', 'Timezone'], ['language', 'Language']];
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const body = { ...f };
+    if (logoFile) {
+      setUploading(true);
+      try { body.logo_url = await uploadImage(logoFile); }
+      catch (err) { setUploading(false); return toast.error(err instanceof Error ? err.message : 'Logo upload failed'); }
+      setUploading(false);
+    }
+    save.mutate(body);
+  };
+
   return (
     <Card><CardContent className="p-6">
-      <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate(f); }}>
+      <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+        <div className="space-y-2 sm:col-span-2">
+          <Label>Logo</Label>
+          <ImageUpload value={f.logo_url ?? ''} file={logoFile}
+            onSelect={setLogoFile}
+            onRemove={() => { setLogoFile(null); setF((s) => ({ ...s, logo_url: '' })); }}
+            uploading={uploading} />
+        </div>
         {fields.map(([k, label]) => (
           <div key={k} className="space-y-2"><Label>{label}</Label><Input disabled={!canEdit} value={f[k] ?? ''} onChange={set(k)} /></div>
         ))}
-        {canEdit && <div className="sm:col-span-2"><Button type="submit" disabled={save.isPending}>Save changes</Button></div>}
+        {canEdit && <div className="sm:col-span-2"><Button type="submit" disabled={save.isPending || uploading}>{uploading ? t('image.uploading') : 'Save changes'}</Button></div>}
       </form>
     </CardContent></Card>
   );

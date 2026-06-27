@@ -7,14 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUpload } from '@/components/ImageUpload';
 import { PageHeader, type Crumb } from '@/components/PageHeader';
 import { useResourceItem, useResourceMutations } from '@/hooks/useResource';
 import { api, type Paginated } from '@/lib/api';
+import { uploadImage } from '@/lib/cloudinary';
 
 export interface FormField {
   name: string;
   label: string;
-  type?: 'text' | 'number' | 'email' | 'textarea' | 'select';
+  type?: 'text' | 'number' | 'email' | 'textarea' | 'select' | 'image';
   required?: boolean;
   step?: string;
   placeholder?: string;
@@ -64,6 +66,8 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
   const item = useResourceItem<T>(resource, id);
   const { create, update } = useResourceMutations(resource);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [files, setFiles] = useState<Record<string, File | null>>({});
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (editing && item.data?.data) {
@@ -85,9 +89,31 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Upload any newly-picked images to Cloudinary first, then save the URLs.
+    const uploaded: Record<string, string> = {};
+    const pending = fields.filter((f) => f.type === 'image' && files[f.name]);
+    if (pending.length) {
+      setUploading(true);
+      try {
+        for (const f of pending) uploaded[f.name] = await uploadImage(files[f.name]!);
+      } catch (err) {
+        setUploading(false);
+        const { toast } = await import('sonner');
+        toast.error(err instanceof Error ? err.message : 'Image upload failed');
+        return;
+      }
+      setUploading(false);
+    }
+
     const body = toBody
       ? toBody(values)
       : fields.reduce<Record<string, unknown>>((acc, f) => {
+          if (f.type === 'image') {
+            if (uploaded[f.name]) acc[f.name] = uploaded[f.name];
+            else if (editing && !values[f.name]) acc[f.name] = null; // cleared
+            return acc;
+          }
           const raw = values[f.name];
           if (raw === undefined) return acc;
           if (raw === '') { if (editing) acc[f.name] = null; return acc; }
@@ -115,7 +141,14 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
             {fields.filter((f) => (f.section ?? 'General Information') === section).map((f) => (
               <div key={f.name} className={`space-y-2 ${f.full || f.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
                 <Label htmlFor={f.name}>{f.label}{f.required && <span className="text-destructive"> *</span>}</Label>
-                {f.type === 'textarea' ? (
+                {f.type === 'image' ? (
+                  <ImageUpload
+                    value={values[f.name] ?? ''}
+                    file={files[f.name] ?? null}
+                    onSelect={(file) => setFiles((s) => ({ ...s, [f.name]: file }))}
+                    onRemove={() => { setFiles((s) => ({ ...s, [f.name]: null })); set(f.name, ''); }}
+                  />
+                ) : f.type === 'textarea' ? (
                   <Textarea id={f.name} value={values[f.name] ?? ''} onChange={(e) => set(f.name, e.target.value)} />
                 ) : f.type === 'select' && f.optionsResource ? (
                   <AsyncOptions field={f} value={values[f.name] ?? ''} onChange={(v) => set(f.name, v)} />
@@ -146,8 +179,8 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
       ))}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={() => navigate(listPath)}>{t('common.cancel')}</Button>
-        <Button type="submit" disabled={create.isPending || update.isPending}>
-          {editing ? t('common.saveChanges') : t('common.createItem', { name: singular })}
+        <Button type="submit" disabled={create.isPending || update.isPending || uploading}>
+          {uploading ? t('image.uploading') : editing ? t('common.saveChanges') : t('common.createItem', { name: singular })}
         </Button>
       </div>
     </form>

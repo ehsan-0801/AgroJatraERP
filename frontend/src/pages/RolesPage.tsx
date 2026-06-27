@@ -20,7 +20,7 @@ const MODULES: { module: Module; label: string }[] = [
 
 function cell(role: Role, module: Module) {
   const c = can(role, module, 'create'), r = can(role, module, 'read'), u = can(role, module, 'update'), d = can(role, module, 'delete');
-  if (c && r && u && d) return <span className="font-medium text-primary">CRUD</span>;
+  if (c && r && u && d) return <span className="font-medium text-primary">ALL</span>;
   if (c && u && !d) return <span className="text-blue-500">Create/Edit</span>;
   if (r && !c && !u && !d) return <span className="text-muted-foreground">Read</span>;
   if (r || c || u || d) return <Check className="mx-auto h-4 w-4 text-emerald-500" />;

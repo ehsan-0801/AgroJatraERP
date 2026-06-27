@@ -19,6 +19,7 @@ import { reportsRouter } from './routes/reports.routes.js';
 import { salesRouter } from './routes/sales.routes.js';
 import { settingsRouter } from './routes/settings.routes.js';
 import { suppliersRouter } from './routes/suppliers.routes.js';
+import { uploadsRouter } from './routes/uploads.routes.js';
 import { usersRouter } from './routes/users.routes.js';
 
 export function createApp() {
@@ -45,6 +46,7 @@ export function createApp() {
   api.use('/accounts', accountsRouter);
   api.use('/users', usersRouter);
   api.use('/settings', settingsRouter);
+  api.use('/uploads', uploadsRouter);
   api.use('/activity', activityRouter);
   api.use('/insights', insightsRouter);
   app.use('/api', api);

@@ -19,7 +19,7 @@ export function ProductFormPage() {
         { name: 'selling_price', label: 'Selling Price', type: 'number', step: '0.01', required: true, section: 'Pricing' },
         { name: 'stock', label: 'Stock', type: 'number', step: '0.01', section: 'Inventory' },
         { name: 'min_stock', label: 'Minimum Stock', type: 'number', step: '0.01', section: 'Inventory' },
-        { name: 'image_url', label: 'Image URL', section: 'Inventory', full: true },
+        { name: 'image_url', label: 'Product Image', type: 'image', section: 'Inventory', full: true },
       ]}
     />
   );

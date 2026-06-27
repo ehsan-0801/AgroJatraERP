@@ -37,7 +37,7 @@ interface SessionState {
   needsOnboarding: boolean;
   loading: boolean;
   error: boolean;
-  load: () => Promise<void>;
+  load: (opts?: { silent?: boolean }) => Promise<void>;
   setActiveOrg: (orgId: string) => Promise<void>;
   clear: () => void;
 }
@@ -52,8 +52,10 @@ export const useSession = create<SessionState>((set) => ({
   loading: true,
   error: false,
 
-  load: async () => {
-    set({ loading: true, error: false });
+  load: async (opts?: { silent?: boolean }) => {
+    // Silent refreshes (e.g. tab refocus / token refresh) must not flip the
+    // splash loader — only the first load shows it.
+    if (!opts?.silent) set({ loading: true, error: false });
     try {
       const res = await api.get<MeResponse>('/auth/me');
       // keep the persisted active-org header in sync with the server's choice
