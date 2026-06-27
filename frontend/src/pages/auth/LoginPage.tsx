@@ -69,9 +69,8 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
       <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600 p-12 text-white lg:flex">
         <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-10 h-80 w-80 rounded-full bg-teal-300/20 blur-3xl" />
-        <Link to="/" className="relative flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 text-lg font-bold backdrop-blur">A</div>
-          <span className="text-lg font-bold">AgroJatra ERP</span>
+        <Link to="/" className="relative">
+          <img src="/logo-dark.png" alt="AgroJatra ERP" className="h-9 w-auto" />
         </Link>
         <div className="relative max-w-md">
           <h2 className="font-display text-4xl font-bold leading-tight">{t('auth.panel.headline')}</h2>

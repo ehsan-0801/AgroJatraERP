@@ -232,6 +232,15 @@ create table if not exists public.activity_logs (
 );
 create index if not exists idx_activity_org on public.activity_logs(organization_id, created_at desc);
 
+-- ─── site_content (super-admin editable public marketing copy overrides) ─────
+create table if not exists public.site_content (
+  id         smallint primary key default 1,
+  data       jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  constraint site_content_single_row check (id = 1)
+);
+insert into public.site_content (id, data) values (1, '{}'::jsonb) on conflict (id) do nothing;
+
 -- ─── updated_at triggers ────────────────────────────────────────────────────
 do $$
 declare t text;

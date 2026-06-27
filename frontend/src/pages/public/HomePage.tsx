@@ -2,9 +2,10 @@ import {
   ArrowRight, BarChart3, Boxes, CheckCircle2, FileText, LayoutDashboard, Lock, Moon, Quote,
   Settings2, ShieldCheck, ShoppingCart, Sparkles, Star, TrendingUp, Truck, UserPlus, Users, Zap,
 } from 'lucide-react';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useSiteContent } from '@/store/siteContent';
 import { Accordion, type FaqItem } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,8 +44,67 @@ const WORKFLOW = [
   { icon: TrendingUp, k: 'reports', img: '/agrajatra/Reports.png' },
 ] as const;
 
+/** Draggable workflow node graph — each card holds its image + text together,
+ *  connectors follow the nodes as you drag them around the canvas. */
+function WorkflowGraph() {
+  const { t } = useTranslation();
+  const W = 240, H = 280, CW = 1180, CH = 680;
+  const INITIAL = [
+    { x: 20, y: 24 }, { x: 320, y: 24 }, { x: 620, y: 24 }, { x: 920, y: 24 },
+    { x: 170, y: 376 }, { x: 470, y: 376 }, { x: 770, y: 376 },
+  ];
+  const [pos, setPos] = useState(INITIAL);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ i: number; dx: number; dy: number; rect: DOMRect } | null>(null);
+
+  const onDown = (e: React.PointerEvent, i: number) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    drag.current = { i, dx: e.clientX - rect.left - pos[i].x, dy: e.clientY - rect.top - pos[i].y, rect };
+  };
+  const onMove = (e: React.PointerEvent) => {
+    if (!drag.current) return;
+    const { i, dx, dy, rect } = drag.current;
+    const x = Math.max(0, Math.min(CW - W, e.clientX - rect.left - dx));
+    const y = Math.max(0, Math.min(CH - H, e.clientY - rect.top - dy));
+    setPos((p) => p.map((q, idx) => (idx === i ? { x, y } : q)));
+  };
+  const onUp = () => { drag.current = null; };
+  const center = (i: number) => ({ cx: pos[i].x + W / 2, cy: pos[i].y + H / 2 });
+
+  return (
+    <>
+      <p className="mt-6 text-center text-xs font-medium text-muted-foreground">{t('home.workflow.drag')}</p>
+      <div className="mt-6 overflow-x-auto pb-4">
+        <div ref={canvasRef} className="relative mx-auto" style={{ width: CW, height: CH }}
+          onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
+          <svg className="pointer-events-none absolute inset-0" width={CW} height={CH}>
+            {WORKFLOW.slice(0, -1).map((_, i) => {
+              const a = center(i), b = center(i + 1);
+              return <line key={i} x1={a.cx} y1={a.cy} x2={b.cx} y2={b.cy} stroke="currentColor" className="text-primary/40" strokeWidth={3} strokeDasharray="6 8" strokeLinecap="round" />;
+            })}
+          </svg>
+          {WORKFLOW.map((step, i) => (
+            <div key={step.k} onPointerDown={(e) => onDown(e, i)} style={{ left: pos[i].x, top: pos[i].y, width: W }}
+              className="group absolute cursor-grab touch-none select-none rounded-2xl border border-slate-200 bg-white shadow-md transition-shadow hover:shadow-xl active:cursor-grabbing active:shadow-2xl">
+              <img src={step.img} alt="" draggable={false} className="pointer-events-none h-36 w-full rounded-t-2xl object-cover" />
+              <div className="px-4 pb-4 text-center">
+                <span className="mx-auto -mt-7 mb-1.5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary ring-4 ring-white"><step.icon className="h-6 w-6" /></span>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{t('home.workflow.stepLabel')} {i + 1}</p>
+                <p className="text-lg font-bold leading-tight text-slate-800">{t(`home.workflow.steps.${step.k}.t`)}</p>
+                <p className="mt-1 text-xs leading-snug text-muted-foreground">{t(`home.workflow.steps.${step.k}.d`)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function HomePage() {
   const { t } = useTranslation();
+  const showcase = useSiteContent((s) => s.showcase);
   const [previewReady, setPreviewReady] = useState(false);
   useEffect(() => { const id = setTimeout(() => setPreviewReady(true), 1000); return () => clearTimeout(id); }, []);
 
@@ -71,9 +131,9 @@ export function HomePage() {
             <p className="mt-6 max-w-lg animate-fade-up text-lg text-muted-foreground [animation-delay:120ms]">{t('home.hero.subtitle')}</p>
             <div className="mt-8 flex animate-fade-up flex-wrap gap-3 [animation-delay:240ms]">
               <Button size="lg" className="group gap-2" asChild>
-                <Link to="/login">{t('home.hero.signIn')}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+                <Link to="/register">{t('home.hero.getStarted')}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild><Link to="/features">{t('home.hero.explore')}</Link></Button>
+              <Button size="lg" variant="outline" asChild><Link to="/login">{t('home.hero.signIn')}</Link></Button>
             </div>
             <div className="mt-7 flex animate-fade-up flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground [animation-delay:360ms]">
               {chips.map((c) => (
@@ -131,40 +191,7 @@ export function HomePage() {
               <p className="mt-3 text-muted-foreground">{t('home.workflow.subtitle')}</p>
             </Reveal>
 
-            <div className="mt-12 flex flex-col items-center gap-0">
-              {[{ steps: WORKFLOW.slice(0, 4), offset: 0 }, { steps: WORKFLOW.slice(4), offset: 4 }].map((row, r) => (
-                <Fragment key={r}>
-                  <div className="flex max-w-full items-start justify-start overflow-x-auto px-1 pb-2 sm:justify-center">
-                    {row.steps.map((step, i) => {
-                      const n = row.offset + i;
-                      return (
-                        <Fragment key={step.k}>
-                          {i > 0 && (
-                            <Reveal as="div" delay={n * 160 - 80} className="flex h-40 w-10 shrink-0 items-center sm:w-20">
-                              <div className="h-0 w-full border-t-[3px] border-dashed border-primary/60" />
-                            </Reveal>
-                          )}
-                          <Reveal as="div" delay={n * 160} className="group flex w-44 shrink-0 flex-col items-center sm:w-56">
-                            <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-lg">
-                              <img src={step.img} alt={t(`home.workflow.steps.${step.k}.t`)} loading="lazy" className="h-40 w-full object-cover" />
-                            </div>
-                            <span className="mt-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm ring-4 ring-white">
-                              <step.icon className="h-5 w-5" />
-                            </span>
-                            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('home.workflow.stepLabel')} {n + 1}</p>
-                            <p className="text-lg font-bold leading-tight text-slate-800">{t(`home.workflow.steps.${step.k}.t`)}</p>
-                            <p className="mt-1 px-1 text-center text-xs leading-snug text-muted-foreground">{t(`home.workflow.steps.${step.k}.d`)}</p>
-                          </Reveal>
-                        </Fragment>
-                      );
-                    })}
-                  </div>
-                  {r === 0 && (
-                    <Reveal as="div" delay={640} className="my-1 h-12 w-0 border-l-[3px] border-dashed border-primary/60"><span className="sr-only">↓</span></Reveal>
-                  )}
-                </Fragment>
-              ))}
-            </div>
+            <WorkflowGraph />
           </div>
         </div>
       </section>
@@ -204,6 +231,31 @@ export function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ───────── Product showcase (super-admin managed) ───────── */}
+      {showcase.length > 0 && (
+        <section className="border-t bg-muted/30">
+          <div className="container py-24">
+            <Reveal className="mx-auto max-w-2xl text-center">
+              <span className="text-sm font-semibold uppercase tracking-wider text-primary">{t('home.showcase.eyebrow')}</span>
+              <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{t('home.showcase.title')}</h2>
+              <p className="mt-3 text-muted-foreground">{t('home.showcase.subtitle')}</p>
+            </Reveal>
+            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {showcase.map((p, i) => (
+                <Reveal key={i} delay={(i % 4) * 90}>
+                  <Card className="group h-full overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg">
+                    <div className="overflow-hidden">
+                      <img src={p.url} alt={p.name ?? ''} loading="lazy" className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    </div>
+                    {p.name && <div className="p-4 text-center font-semibold">{p.name}</div>}
+                  </Card>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ───────── Get started ───────── */}
       <section className="border-y bg-muted/30">
@@ -316,7 +368,7 @@ export function HomePage() {
               <h2 className="text-3xl font-bold sm:text-4xl">{t('home.cta.title')}</h2>
               <p className="max-w-md text-white/90">{t('home.cta.subtitle')}</p>
               <Button size="lg" variant="secondary" className="group gap-2" asChild>
-                <Link to="/login">{t('home.cta.button')}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+                <Link to="/register">{t('home.cta.button')}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               </Button>
             </CardContent>
           </Card>

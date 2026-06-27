@@ -153,7 +153,7 @@ export function AppLayout() {
         <header className="flex h-16 items-center justify-between border-b bg-card px-6">
           <div className="md:hidden"><Logo className="h-7" /></div>
           <div className="ml-auto flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/')} title={t('publicNav.home')} aria-label={t('publicNav.home')}>
+            <Button variant="ghost" size="icon" onClick={() => window.open('/', '_blank', 'noopener')} title={t('publicNav.home')} aria-label={t('publicNav.home')}>
               <Home className="h-4 w-4" />
             </Button>
             <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{t(`roles.${role}`)}</span>

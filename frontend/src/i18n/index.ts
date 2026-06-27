@@ -26,4 +26,14 @@ export function setLanguage(lang: Lang) {
   applyLang(lang);
 }
 
+/** Merge super-admin-edited marketing copy over the built-in translations.
+ *  Deep-merges and overwrites, then refreshes the UI. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function applyContentOverrides(data: { en?: any; bn?: any } | null | undefined) {
+  if (!data) return;
+  if (data.en) i18n.addResourceBundle('en', 'translation', data.en, true, true);
+  if (data.bn) i18n.addResourceBundle('bn', 'translation', data.bn, true, true);
+  i18n.changeLanguage(i18n.language); // force a re-render with the merged copy
+}
+
 export default i18n;

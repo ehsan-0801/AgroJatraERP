@@ -118,6 +118,23 @@ adminRouter.get('/data/:entity', asyncHandler(async (req, res) => {
   res.json({ data: rows });
 }));
 
+// GET/PUT /admin/content — the editable public marketing copy (EN + BN overrides)
+adminRouter.get('/content', asyncHandler(async (_req, res) => {
+  const { rows } = await query<{ data: unknown }>('select data from public.site_content where id = 1');
+  res.json({ data: rows[0]?.data ?? {} });
+}));
+
+adminRouter.put('/content', asyncHandler(async (req, res) => {
+  const data = req.body?.data;
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) throw new ApiError(400, 'Invalid content payload');
+  await query(
+    `insert into public.site_content (id, data, updated_at) values (1, $1, now())
+     on conflict (id) do update set data = excluded.data, updated_at = now()`,
+    [JSON.stringify(data)],
+  );
+  res.json({ data });
+}));
+
 // GET /admin/users — every user and the organizations they belong to
 adminRouter.get('/users', asyncHandler(async (_req, res) => {
   const { rows } = await query(

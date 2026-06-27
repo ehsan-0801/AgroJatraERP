@@ -9,6 +9,7 @@ import { activityRouter } from './routes/activity.routes.js';
 import { adminRouter } from './routes/admin.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { categoriesRouter } from './routes/categories.routes.js';
+import { contentRouter } from './routes/content.routes.js';
 import { customersRouter } from './routes/customers.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
 import { insightsRouter } from './routes/insights.routes.js';
@@ -33,6 +34,7 @@ export function createApp() {
 
   const api = express.Router();
   api.use('/auth', authRouter);
+  api.use('/content', contentRouter);
   api.use('/organizations', organizationsRouter);
   api.use('/admin', adminRouter);
   api.use('/dashboard', dashboardRouter);

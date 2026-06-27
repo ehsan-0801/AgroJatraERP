@@ -5,7 +5,10 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingRoute, ProtectedRoute, RequirePermission, RequireSuperAdmin } from '@/components/layout/ProtectedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
+import { applyContentOverrides } from '@/i18n';
+import { api } from '@/lib/api';
 import { useAuth } from '@/store/auth';
+import { useSiteContent } from '@/store/siteContent';
 import { useTheme } from '@/store/theme';
 // public
 import { HomePage } from '@/pages/public/HomePage';
@@ -40,6 +43,7 @@ import { RolesPage } from '@/pages/RolesPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { AdminOverviewPage, AdminOrganizationsPage, AdminOrganizationDetailPage, AdminDataPage, AdminUsersPage } from '@/pages/admin/AdminPages';
+import { AdminContentPage } from '@/pages/admin/AdminContentPage';
 
 export default function App() {
   const init = useAuth((s) => s.init);
@@ -48,6 +52,11 @@ export default function App() {
   const [minElapsed, setMinElapsed] = useState(false);
 
   useEffect(() => { init(); useTheme.getState().setTheme(theme); /* eslint-disable-next-line */ }, []);
+  useEffect(() => {
+    api.get<{ data: { en?: unknown; bn?: unknown; showcase?: { url: string; name?: string }[] } }>('/content')
+      .then((r) => { applyContentOverrides(r.data as never); useSiteContent.getState().setShowcase(r.data?.showcase ?? []); })
+      .catch(() => {});
+  }, []);
   useEffect(() => { const t = setTimeout(() => setMinElapsed(true), 700); return () => clearTimeout(t); }, []);
 
   // Branded splash on first load until auth is initialized (min 700ms so it doesn't flash).
@@ -79,6 +88,7 @@ export default function App() {
         <Route path="organizations/:id" element={<AdminOrganizationDetailPage />} />
         <Route path="data" element={<AdminDataPage />} />
         <Route path="users" element={<AdminUsersPage />} />
+        <Route path="website" element={<AdminContentPage />} />
       </Route>
 
       {/* Authenticated app */}

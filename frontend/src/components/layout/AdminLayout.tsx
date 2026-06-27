@@ -1,4 +1,4 @@
-import { Boxes, Building2, LayoutDashboard, LogOut, Moon, ShieldCheck, Sun, UsersRound } from 'lucide-react';
+import { Boxes, Building2, FileText, Home, LayoutDashboard, LogOut, Moon, ShieldCheck, Sun, UsersRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router-dom';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -20,6 +20,7 @@ export function AdminLayout() {
     { to: '/admin/organizations', icon: Building2, label: t('admin.nav.organizations') },
     { to: '/admin/data', icon: Boxes, label: t('admin.nav.data') },
     { to: '/admin/users', icon: UsersRound, label: t('admin.nav.users') },
+    { to: '/admin/website', icon: FileText, label: t('admin.nav.website') },
   ];
 
   return (
@@ -44,6 +45,9 @@ export function AdminLayout() {
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-background/80 px-5 backdrop-blur">
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">{t('admin.badge')}</span>
           <div className="ml-auto flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => window.open('/', '_blank', 'noopener')} title={t('publicNav.home')} aria-label={t('publicNav.home')}>
+              <Home className="h-4 w-4" />
+            </Button>
             <LanguageSwitcher />
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Toggle theme">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
