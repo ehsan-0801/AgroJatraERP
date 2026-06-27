@@ -2,6 +2,14 @@ import { supabase } from './supabase';
 
 const BASE_URL = import.meta.env.VITE_API_URL as string;
 
+/** localStorage key holding the active organization id (sent as x-org-id). */
+export const ORG_KEY = 'agrojatra-org';
+export const getActiveOrg = () => localStorage.getItem(ORG_KEY);
+export const setActiveOrgId = (id: string | null) => {
+  if (id) localStorage.setItem(ORG_KEY, id);
+  else localStorage.removeItem(ORG_KEY);
+};
+
 export class ApiError extends Error {
   status: number;
   details?: unknown;
@@ -15,12 +23,14 @@ export class ApiError extends Error {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
+  const org = getActiveOrg();
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(org ? { 'x-org-id': org } : {}),
       ...(options.headers ?? {}),
     },
   });

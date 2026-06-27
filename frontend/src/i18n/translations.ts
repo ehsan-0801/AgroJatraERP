@@ -173,9 +173,28 @@ export const en = {
     sales: { title: 'Sales', desc: 'Record sales & invoices — stock is validated and deducted' },
     reports: { title: 'Reports', desc: 'Analyze and export your business data' },
     accounts: { title: 'Accounts', desc: 'Financial summary and transaction ledger' },
-    users: { title: 'Users', desc: 'Manage team members and their roles' },
+    users: { title: 'Members', desc: 'Manage your organization members and their roles' },
     roles: { title: 'Roles & Permissions', desc: 'What each system role can do' },
-    settings: { title: 'Settings', desc: 'Company & personal preferences' },
+    settings: { title: 'Settings', desc: 'Organization & personal preferences' },
+  },
+  onboarding: {
+    title: 'Create your organization', subtitle: 'Set up your workspace to get started. You can invite up to 5 members.',
+    name: 'Organization name', namePlaceholder: 'e.g. Bengal Mart', phone: 'Phone', email: 'Email', address: 'Address',
+    create: 'Create organization', creating: 'Creating…', created: 'Organization created',
+  },
+  members: {
+    add: 'Add member', count: '{{current}} of {{max}} members', capReached: 'Member limit reached (5 per organization). Remove a member to add a new one.',
+    name: 'Name', email: 'Email', role: 'Role', status: 'Status', joined: 'Joined', owner: 'Owner',
+    removeConfirm: 'Remove {{name}} from this organization?',
+  },
+  admin: {
+    title: 'Super Admin', badge: 'Super Admin',
+    nav: { overview: 'Overview', organizations: 'Organizations', data: 'Data', users: 'Users' },
+    overview: { title: 'Platform Overview', subtitle: 'Activity across every organization', organizations: 'Organizations', users: 'Users', products: 'Products', sales: 'Sales', revenue: 'Total Revenue' },
+    orgs: { subtitle: 'Every organization on the platform', name: 'Organization', owner: 'Owner', members: 'Members', products: 'Products', sales: 'Sales', revenue: 'Revenue' },
+    detail: { members: 'Members', recentSales: 'Recent sales' },
+    data: { title: 'All Data', subtitle: 'Products, categories and more across every organization', organization: 'Organization', allOrgs: 'All organizations', products: 'Products', categories: 'Categories', customers: 'Customers', suppliers: 'Suppliers' },
+    users: { subtitle: 'Every account and its organization memberships', orgs: 'Organizations' },
   },
 };
 
@@ -351,9 +370,28 @@ export const bn: typeof en = {
     sales: { title: 'বিক্রয়', desc: 'বিক্রয় ও চালান রেকর্ড করুন — স্টক যাচাই করে কমানো হয়' },
     reports: { title: 'রিপোর্ট', desc: 'আপনার ব্যবসার ডেটা বিশ্লেষণ ও এক্সপোর্ট করুন' },
     accounts: { title: 'হিসাব', desc: 'আর্থিক সারসংক্ষেপ ও লেনদেনের খতিয়ান' },
-    users: { title: 'ব্যবহারকারী', desc: 'টিম সদস্য ও তাদের ভূমিকা পরিচালনা করুন' },
+    users: { title: 'সদস্য', desc: 'আপনার প্রতিষ্ঠানের সদস্য ও তাদের ভূমিকা পরিচালনা করুন' },
     roles: { title: 'ভূমিকা ও অনুমতি', desc: 'প্রতিটি সিস্টেম ভূমিকা কী করতে পারে' },
-    settings: { title: 'সেটিংস', desc: 'কোম্পানি ও ব্যক্তিগত পছন্দ' },
+    settings: { title: 'সেটিংস', desc: 'প্রতিষ্ঠান ও ব্যক্তিগত পছন্দ' },
+  },
+  onboarding: {
+    title: 'আপনার প্রতিষ্ঠান তৈরি করুন', subtitle: 'শুরু করতে আপনার ওয়ার্কস্পেস সেট করুন। আপনি সর্বোচ্চ ৫ জন সদস্য যোগ করতে পারবেন।',
+    name: 'প্রতিষ্ঠানের নাম', namePlaceholder: 'যেমন: বেঙ্গল মার্ট', phone: 'ফোন', email: 'ইমেইল', address: 'ঠিকানা',
+    create: 'প্রতিষ্ঠান তৈরি করুন', creating: 'তৈরি হচ্ছে…', created: 'প্রতিষ্ঠান তৈরি হয়েছে',
+  },
+  members: {
+    add: 'সদস্য যোগ করুন', count: '{{max}} জনের মধ্যে {{current}} জন সদস্য', capReached: 'সদস্য সীমা পূর্ণ (প্রতি প্রতিষ্ঠানে ৫ জন)। নতুন যোগ করতে একজনকে সরান।',
+    name: 'নাম', email: 'ইমেইল', role: 'ভূমিকা', status: 'অবস্থা', joined: 'যোগদান', owner: 'মালিক',
+    removeConfirm: '{{name}} কে এই প্রতিষ্ঠান থেকে সরাবেন?',
+  },
+  admin: {
+    title: 'সুপার অ্যাডমিন', badge: 'সুপার অ্যাডমিন',
+    nav: { overview: 'ওভারভিউ', organizations: 'প্রতিষ্ঠান', data: 'ডেটা', users: 'ব্যবহারকারী' },
+    overview: { title: 'প্ল্যাটফর্ম ওভারভিউ', subtitle: 'সকল প্রতিষ্ঠানের কার্যক্রম', organizations: 'প্রতিষ্ঠান', users: 'ব্যবহারকারী', products: 'পণ্য', sales: 'বিক্রয়', revenue: 'মোট আয়' },
+    orgs: { subtitle: 'প্ল্যাটফর্মের সকল প্রতিষ্ঠান', name: 'প্রতিষ্ঠান', owner: 'মালিক', members: 'সদস্য', products: 'পণ্য', sales: 'বিক্রয়', revenue: 'আয়' },
+    detail: { members: 'সদস্য', recentSales: 'সাম্প্রতিক বিক্রয়' },
+    data: { title: 'সকল ডেটা', subtitle: 'সকল প্রতিষ্ঠানের পণ্য, ক্যাটাগরি ও আরও কিছু', organization: 'প্রতিষ্ঠান', allOrgs: 'সকল প্রতিষ্ঠান', products: 'পণ্য', categories: 'ক্যাটাগরি', customers: 'গ্রাহক', suppliers: 'সরবরাহকারী' },
+    users: { subtitle: 'প্রতিটি অ্যাকাউন্ট ও তার প্রতিষ্ঠান সদস্যপদ', orgs: 'প্রতিষ্ঠান' },
   },
 };
 

@@ -1,7 +1,8 @@
 import { query } from '../db/pool.js';
 
-/** Records an entry in the activity/audit log. Never throws (best-effort). */
+/** Records an entry in the per-organization activity/audit log. Never throws. */
 export async function logActivity(opts: {
+  organizationId?: string | null;
   userId?: string | null;
   action: string;
   entity: string;
@@ -11,9 +12,10 @@ export async function logActivity(opts: {
 }): Promise<void> {
   try {
     await query(
-      `insert into public.activity_logs (user_id, action, entity, entity_id, description, metadata)
-       values ($1,$2,$3,$4,$5,$6)`,
+      `insert into public.activity_logs (organization_id, user_id, action, entity, entity_id, description, metadata)
+       values ($1,$2,$3,$4,$5,$6,$7)`,
       [
+        opts.organizationId ?? null,
         opts.userId ?? null,
         opts.action,
         opts.entity,

@@ -5,14 +5,38 @@ import { useSession } from '@/store/session';
 import type { Action, Module } from '@/lib/permissions';
 import { can } from '@/lib/permissions';
 
+/** Guards the authenticated app: requires login + an active organization.
+ *  Routes users without an org to onboarding, and super admins to /admin. */
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const sessionLoading = useSession((s) => s.loading);
+  const s = useSession();
 
-  if (loading || (user && sessionLoading)) {
-    return <BrandSplash label="Loading your workspace" />;
-  }
+  if (loading || (user && s.loading)) return <BrandSplash label="Loading your workspace" />;
   if (!user) return <Navigate to="/login" replace />;
+  if (s.error) return <>{children}</>; // AppLayout shows a retry screen
+  if (s.needsOnboarding) return <Navigate to="/onboarding" replace />;
+  if (!s.activeOrgId) return <Navigate to={s.isSuperAdmin ? '/admin' : '/onboarding'} replace />;
+  return <>{children}</>;
+}
+
+/** Onboarding screen guard: requires login, sends already-onboarded users away. */
+export function OnboardingRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const s = useSession();
+  if (loading || (user && s.loading)) return <BrandSplash label="Loading" />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (s.isSuperAdmin) return <Navigate to="/admin" replace />;
+  if (s.activeOrgId) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
+/** Super-admin console guard. */
+export function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const s = useSession();
+  if (loading || (user && s.loading)) return <BrandSplash label="Loading" />;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!s.isSuperAdmin) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 }
 

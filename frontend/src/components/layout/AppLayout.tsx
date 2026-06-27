@@ -49,6 +49,10 @@ export function AppLayout() {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const user = useSession((s) => s.user);
+  const role = useSession((s) => s.role);
+  const memberships = useSession((s) => s.memberships);
+  const activeOrgId = useSession((s) => s.activeOrgId);
+  const setActiveOrg = useSession((s) => s.setActiveOrg);
   const sessionError = useSession((s) => s.error);
   const reload = useSession((s) => s.load);
   const navigate = useNavigate();
@@ -82,7 +86,13 @@ export function AppLayout() {
     );
   }
 
-  const role = user.role;
+  const handleSwitchOrg = async (orgId: string) => {
+    if (orgId === activeOrgId) return;
+    await setActiveOrg(orgId);
+    qc.clear();
+    navigate('/dashboard');
+  };
+
   const groups = NAV
     .map((g) => ({ ...g, items: g.items.filter((i) => can(role, i.module, 'read')) }))
     .filter((g) => g.items.length);
@@ -93,6 +103,24 @@ export function AppLayout() {
         <div className="flex h-16 items-center border-b px-5">
           <NavLink to="/dashboard"><Logo className="h-8" /></NavLink>
         </div>
+
+        {memberships.length > 0 && (
+          <div className="border-b px-3 py-3">
+            {memberships.length > 1 ? (
+              <select
+                value={activeOrgId ?? ''}
+                onChange={(e) => handleSwitchOrg(e.target.value)}
+                className="w-full rounded-lg border bg-background px-2.5 py-2 text-sm font-medium outline-none focus:ring-2 focus:ring-primary/30">
+                {memberships.map((m) => <option key={m.organization_id} value={m.organization_id}>{m.organization_name}</option>)}
+              </select>
+            ) : (
+              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-2.5 py-2 text-sm font-medium">
+                <Building2 className="h-4 w-4 shrink-0 text-primary" />
+                <span className="truncate">{memberships[0].organization_name}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <nav className="flex-1 space-y-4 overflow-y-auto p-3">
           {groups.map((g, gi) => (

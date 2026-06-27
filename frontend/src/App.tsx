@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { BrandSplash } from '@/components/Loader';
+import { AdminLayout } from '@/components/layout/AdminLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ProtectedRoute, RequirePermission } from '@/components/layout/ProtectedRoute';
+import { OnboardingRoute, ProtectedRoute, RequirePermission, RequireSuperAdmin } from '@/components/layout/ProtectedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
 import { useAuth } from '@/store/auth';
 import { useTheme } from '@/store/theme';
@@ -37,6 +38,8 @@ import { UsersListPage } from '@/pages/users/UsersListPage';
 import { UserFormPage } from '@/pages/users/UserFormPage';
 import { RolesPage } from '@/pages/RolesPage';
 import { SettingsPage } from '@/pages/SettingsPage';
+import { OnboardingPage } from '@/pages/OnboardingPage';
+import { AdminOverviewPage, AdminOrganizationsPage, AdminOrganizationDetailPage, AdminDataPage, AdminUsersPage } from '@/pages/admin/AdminPages';
 
 export default function App() {
   const init = useAuth((s) => s.init);
@@ -65,6 +68,18 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      {/* Onboarding (create your organization right after signup) */}
+      <Route path="/onboarding" element={<OnboardingRoute><OnboardingPage /></OnboardingRoute>} />
+
+      {/* Super Admin console */}
+      <Route path="/admin" element={<RequireSuperAdmin><AdminLayout /></RequireSuperAdmin>}>
+        <Route index element={<AdminOverviewPage />} />
+        <Route path="organizations" element={<AdminOrganizationsPage />} />
+        <Route path="organizations/:id" element={<AdminOrganizationDetailPage />} />
+        <Route path="data" element={<AdminDataPage />} />
+        <Route path="users" element={<AdminUsersPage />} />
+      </Route>
 
       {/* Authenticated app */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

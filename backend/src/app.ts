@@ -6,11 +6,13 @@ import { env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { accountsRouter } from './routes/accounts.routes.js';
 import { activityRouter } from './routes/activity.routes.js';
+import { adminRouter } from './routes/admin.routes.js';
 import { authRouter } from './routes/auth.routes.js';
 import { categoriesRouter } from './routes/categories.routes.js';
 import { customersRouter } from './routes/customers.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
 import { insightsRouter } from './routes/insights.routes.js';
+import { organizationsRouter } from './routes/organizations.routes.js';
 import { productsRouter } from './routes/products.routes.js';
 import { purchasesRouter } from './routes/purchases.routes.js';
 import { reportsRouter } from './routes/reports.routes.js';
@@ -30,6 +32,8 @@ export function createApp() {
 
   const api = express.Router();
   api.use('/auth', authRouter);
+  api.use('/organizations', organizationsRouter);
+  api.use('/admin', adminRouter);
   api.use('/dashboard', dashboardRouter);
   api.use('/categories', categoriesRouter);
   api.use('/products', productsRouter);
