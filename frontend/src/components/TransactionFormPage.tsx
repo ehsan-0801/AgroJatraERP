@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useResourceMutations } from '@/hooks/useResource';
 import { api, type Paginated } from '@/lib/api';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, numInput, stripLeadingZeros } from '@/lib/utils';
 
 interface Product { id: string; name: string; sku: string; stock: string; purchase_price: string; selling_price: string }
 interface Party { id: string; name: string }
@@ -120,11 +120,11 @@ export function TransactionFormPage({ kind }: Props) {
               </div>
               <div className="col-span-2 space-y-1">
                 {i === 0 && <Label className="text-xs">Qty</Label>}
-                <Input type="number" min="0" step="0.01" value={line.quantity} onChange={(e) => setLine(i, { quantity: Number(e.target.value) })} />
+                <Input type="number" min="0" step="0.01" value={numInput(line.quantity)} onChange={(e) => setLine(i, { quantity: Number(stripLeadingZeros(e.target.value)) })} />
               </div>
               <div className="col-span-3 space-y-1">
                 {i === 0 && <Label className="text-xs">Unit price</Label>}
-                <Input type="number" min="0" step="0.01" value={line.unit_price} onChange={(e) => setLine(i, { unit_price: Number(e.target.value) })} />
+                <Input type="number" min="0" step="0.01" value={numInput(line.unit_price)} onChange={(e) => setLine(i, { unit_price: Number(stripLeadingZeros(e.target.value)) })} />
               </div>
               <Button type="button" variant="ghost" size="icon" className="col-span-1" onClick={() => setLines((l) => l.filter((_, idx) => idx !== i))}>
                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -140,8 +140,8 @@ export function TransactionFormPage({ kind }: Props) {
       <Card>
         <CardHeader><CardTitle className="text-base">Summary</CardTitle></CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-1"><Label className="text-xs">Tax</Label><Input type="number" min="0" step="0.01" value={meta.tax} onChange={(e) => setMeta((m) => ({ ...m, tax: Number(e.target.value) }))} /></div>
-          <div className="space-y-1"><Label className="text-xs">Discount</Label><Input type="number" min="0" step="0.01" value={meta.discount} onChange={(e) => setMeta((m) => ({ ...m, discount: Number(e.target.value) }))} /></div>
+          <div className="space-y-1"><Label className="text-xs">Tax</Label><Input type="number" min="0" step="0.01" value={numInput(meta.tax)} onChange={(e) => setMeta((m) => ({ ...m, tax: Number(stripLeadingZeros(e.target.value)) }))} /></div>
+          <div className="space-y-1"><Label className="text-xs">Discount</Label><Input type="number" min="0" step="0.01" value={numInput(meta.discount)} onChange={(e) => setMeta((m) => ({ ...m, discount: Number(stripLeadingZeros(e.target.value)) }))} /></div>
           {isSale && (
             <div className="space-y-1"><Label className="text-xs">Payment method</Label>
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={meta.payment_method} onChange={(e) => setMeta((m) => ({ ...m, payment_method: e.target.value }))}>
@@ -149,7 +149,7 @@ export function TransactionFormPage({ kind }: Props) {
               </select>
             </div>
           )}
-          {isSale && <div className="space-y-1"><Label className="text-xs">Paid</Label><Input type="number" min="0" step="0.01" value={meta.paid} onChange={(e) => setMeta((m) => ({ ...m, paid: Number(e.target.value) }))} /></div>}
+          {isSale && <div className="space-y-1"><Label className="text-xs">Paid</Label><Input type="number" min="0" step="0.01" value={numInput(meta.paid)} onChange={(e) => setMeta((m) => ({ ...m, paid: Number(stripLeadingZeros(e.target.value)) }))} /></div>}
           <div className="space-y-1 sm:col-span-3"><Label className="text-xs">Notes</Label><Input value={meta.notes} onChange={(e) => setMeta((m) => ({ ...m, notes: e.target.value }))} /></div>
           <div className="sm:col-span-3 flex items-center justify-between border-t pt-3">
             <span className="text-sm text-muted-foreground">Subtotal {formatCurrency(subtotal)} · Grand total</span>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
 import { useResourceItem, useResourceMutations } from '@/hooks/useResource';
 import { ROLE_LABELS, type Role } from '@/lib/permissions';
 
@@ -42,7 +43,7 @@ export function UserFormPage() {
         <CardHeader><CardTitle className="text-base">Account</CardTitle></CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2"><Label>Email *</Label><Input type="email" required disabled={editing} value={f.email} onChange={(e) => setF((s) => ({ ...s, email: e.target.value }))} /></div>
-          {!editing && <div className="space-y-2"><Label>Password *</Label><Input type="password" required minLength={6} value={f.password} onChange={(e) => setF((s) => ({ ...s, password: e.target.value }))} /></div>}
+          {!editing && <div className="space-y-2"><Label>Password *</Label><PasswordInput required minLength={6} value={f.password} onChange={(e) => setF((s) => ({ ...s, password: e.target.value }))} /></div>}
           <div className="space-y-2"><Label>Full name</Label><Input value={f.full_name} onChange={(e) => setF((s) => ({ ...s, full_name: e.target.value }))} /></div>
           <div className="space-y-2"><Label>Phone</Label><Input value={f.phone} onChange={(e) => setF((s) => ({ ...s, phone: e.target.value }))} /></div>
           <div className="space-y-2"><Label>Role *</Label>

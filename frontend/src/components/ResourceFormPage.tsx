@@ -12,6 +12,7 @@ import { PageHeader, type Crumb } from '@/components/PageHeader';
 import { useResourceItem, useResourceMutations } from '@/hooks/useResource';
 import { api, type Paginated } from '@/lib/api';
 import { uploadImage } from '@/lib/cloudinary';
+import { stripLeadingZeros } from '@/lib/utils';
 
 export interface FormField {
   name: string;
@@ -169,7 +170,7 @@ export function ResourceFormPage<T extends Record<string, unknown>>({
                     required={f.required}
                     placeholder={f.placeholder}
                     value={values[f.name] ?? ''}
-                    onChange={(e) => set(f.name, e.target.value)}
+                    onChange={(e) => set(f.name, f.type === 'number' ? stripLeadingZeros(e.target.value) : e.target.value)}
                   />
                 )}
               </div>

@@ -45,7 +45,13 @@ export function AdminOverviewPage() {
 }
 
 // ── Organizations list ───────────────────────────────────────────────────────
-interface OrgRow { id: string; name: string; owner_email: string; owner_name: string; members: number; products: number; sales: number; revenue: number; created_at: string; }
+interface OrgRow { id: string; name: string; logo_url: string | null; owner_email: string; owner_name: string; members: number; products: number; sales: number; revenue: number; created_at: string; }
+
+function OrgLogo({ url, name, size = 'h-8 w-8' }: { url?: string | null; name: string; size?: string }) {
+  return url
+    ? <img src={url} alt="" className={`${size} shrink-0 rounded-lg border object-cover`} />
+    : <span className={`${size} flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary`}>{name.charAt(0).toUpperCase()}</span>;
+}
 export function AdminOrganizationsPage() {
   const { t } = useTranslation();
   const [rows, setRows] = useState<OrgRow[] | null>(null);
@@ -72,7 +78,12 @@ export function AdminOrganizationsPage() {
             <tbody>
               {rows?.map((o) => (
                 <tr key={o.id} className="border-b last:border-0 hover:bg-accent/40">
-                  <td className="px-4 py-3 font-medium"><Link to={`/admin/organizations/${o.id}`} className="hover:text-primary hover:underline">{o.name}</Link></td>
+                  <td className="px-4 py-3">
+                    <Link to={`/admin/organizations/${o.id}`} className="flex items-center gap-3 font-medium hover:text-primary">
+                      <OrgLogo url={o.logo_url} name={o.name} />
+                      <span className="hover:underline">{o.name}</span>
+                    </Link>
+                  </td>
                   <td className="px-4 py-3 text-muted-foreground">{o.owner_email}</td>
                   <td className="px-4 py-3 text-right">{o.members}/5</td>
                   <td className="px-4 py-3 text-right">{o.products}</td>
@@ -91,7 +102,7 @@ export function AdminOrganizationsPage() {
 
 // ── Organization detail ──────────────────────────────────────────────────────
 interface OrgDetail {
-  organization: { id: string; name: string; phone?: string; email?: string; address?: string; created_at: string };
+  organization: { id: string; name: string; logo_url?: string | null; phone?: string; email?: string; address?: string; created_at: string };
   members: { id: string; email: string; full_name: string; role: string; status: string; is_owner: boolean }[];
   counts: Record<string, number>;
   recentSales: { id: string; invoice_no: string; total: number; sale_date: string; customer_name: string }[];
@@ -107,8 +118,13 @@ export function AdminOrganizationDetailPage() {
     <div className="space-y-6">
       <div>
         <Link to="/admin/organizations" className="text-sm text-primary hover:underline">← {t('admin.nav.organizations')}</Link>
-        <h1 className="mt-2 font-display text-2xl font-bold tracking-tight">{d.organization.name}</h1>
-        <p className="text-sm text-muted-foreground">{[d.organization.email, d.organization.phone, d.organization.address].filter(Boolean).join(' · ')}</p>
+        <div className="mt-2 flex items-center gap-3">
+          <OrgLogo url={d.organization.logo_url} name={d.organization.name} size="h-12 w-12" />
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight">{d.organization.name}</h1>
+            <p className="text-sm text-muted-foreground">{[d.organization.email, d.organization.phone, d.organization.address].filter(Boolean).join(' · ')}</p>
+          </div>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {(['products', 'categories', 'customers', 'suppliers', 'purchases', 'sales'] as const).map((k) => (

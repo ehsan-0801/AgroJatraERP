@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '@/components/PageHeader';
@@ -78,11 +78,16 @@ export function UsersListPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{formatDate(m.created_at)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button variant="ghost" size="icon" disabled={locked}
-                        onClick={() => { if (confirm(t('members.removeConfirm', { name: m.full_name || m.email }))) remove.mutate(m.id); }}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button asChild variant="ghost" size="icon" title={t('common.edit')}>
+                          <Link to={`/users/${m.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" disabled={locked} title={t('common.delete')}
+                          onClick={() => { if (confirm(t('members.removeConfirm', { name: m.full_name || m.email }))) remove.mutate(m.id); }}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );
