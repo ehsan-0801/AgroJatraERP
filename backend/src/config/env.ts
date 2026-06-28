@@ -23,4 +23,10 @@ export const env = {
     apiSecret: process.env.CLOUDINARY_API_SECRET ?? '',
     folder: process.env.CLOUDINARY_FOLDER ?? 'agrajatra',
   },
+  email: {
+    apiKey: process.env.RESEND_API_KEY ?? '',
+    from: process.env.EMAIL_FROM ?? 'AgroJatra ERP <onboarding@resend.dev>',
+    // public app URL used in email links (falls back to the first CORS origin)
+    appUrl: process.env.APP_URL ?? (process.env.CORS_ORIGIN ?? 'http://localhost:5173').split(',')[0].trim(),
+  },
 };

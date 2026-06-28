@@ -105,11 +105,15 @@ function WorkflowGraph() {
 export function HomePage() {
   const { t } = useTranslation();
   const showcase = useSiteContent((s) => s.showcase);
+  const reviews = useSiteContent((s) => s.reviews);
   const [previewReady, setPreviewReady] = useState(false);
   useEffect(() => { const id = setTimeout(() => setPreviewReady(true), 1000); return () => clearTimeout(id); }, []);
 
   const chips = t('home.hero.chips', { returnObjects: true }) as string[];
-  const testimonials = t('home.testimonials.items', { returnObjects: true }) as { quote: string; name: string; role: string }[];
+  const staticTestimonials = t('home.testimonials.items', { returnObjects: true }) as { quote: string; name: string; role: string }[];
+  const testimonials = reviews.length
+    ? reviews.map((r) => ({ quote: r.comment, name: r.organization_name, role: r.author_name || r.organization_address || '', rating: r.rating }))
+    : staticTestimonials.map((s) => ({ ...s, rating: 5 }));
   const faqs = t('home.faq.items', { returnObjects: true }) as FaqItem[];
 
   return (
@@ -335,13 +339,13 @@ export function HomePage() {
           </Reveal>
           <div className="mt-14 grid gap-6 md:grid-cols-3">
             {testimonials.map((tm, i) => (
-              <Reveal key={tm.name} delay={i * 110}>
+              <Reveal key={`${tm.name}-${i}`} delay={i * 110}>
                 <Card className="h-full">
                   <CardContent className="flex h-full flex-col p-6">
                     <Quote className="h-7 w-7 text-primary/40" />
                     <p className="mt-3 flex-1 text-sm leading-relaxed">{tm.quote}</p>
-                    <div className="mt-5 flex items-center gap-1 text-amber-400">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className="h-4 w-4 fill-current" />)}</div>
-                    <div className="mt-3"><p className="font-semibold">{tm.name}</p><p className="text-xs text-muted-foreground">{tm.role}</p></div>
+                    <div className="mt-5 flex items-center gap-1 text-amber-400">{Array.from({ length: 5 }).map((_, s) => <Star key={s} className={`h-4 w-4 ${s < (tm.rating ?? 5) ? 'fill-current' : 'fill-none text-muted-foreground/30'}`} />)}</div>
+                    <div className="mt-3"><p className="font-semibold">{tm.name}</p>{tm.role && <p className="text-xs text-muted-foreground">{tm.role}</p>}</div>
                   </CardContent>
                 </Card>
               </Reveal>

@@ -1,3 +1,4 @@
+import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -25,6 +26,7 @@ export function SettingsPage() {
     ...(canCompany ? [{ value: 'company', label: 'Company' }] : []),
     { value: 'profile', label: 'Profile' },
     { value: 'security', label: 'Security' },
+    ...(canCompany ? [{ value: 'review', label: t('review.tab') }] : []),
   ];
 
   return (
@@ -34,7 +36,46 @@ export function SettingsPage() {
       {tab === 'company' && canCompany && <CompanySettings />}
       {tab === 'profile' && <ProfileSettings />}
       {tab === 'security' && <SecuritySettings />}
+      {tab === 'review' && canCompany && <ReviewSettings />}
     </div>
+  );
+}
+
+function ReviewSettings() {
+  const { t } = useTranslation();
+  const { data } = useQuery({ queryKey: ['my-review'], queryFn: () => api.get<{ data: { rating: number; comment: string } | null }>('/reviews/me') });
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  useEffect(() => { if (data?.data) { setRating(data.data.rating); setComment(data.data.comment); } }, [data]);
+  const save = useMutation({
+    mutationFn: () => api.put('/reviews', { rating, comment }),
+    onSuccess: () => toast.success(t('review.saved')),
+    onError: (e: Error) => toast.error(e.message),
+  });
+  return (
+    <Card><CardContent className="max-w-xl space-y-5 p-6">
+      <div>
+        <h2 className="font-semibold">{t('review.title')}</h2>
+        <p className="mt-0.5 text-sm text-muted-foreground">{t('review.subtitle')}</p>
+      </div>
+      <div className="space-y-1.5">
+        <Label>{t('review.rating')}</Label>
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} type="button" onClick={() => setRating(n)} aria-label={`${n}`}>
+              <Star className={`h-7 w-7 ${n <= rating ? 'fill-amber-400 text-amber-400' : 'fill-none text-muted-foreground/40'}`} />
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label htmlFor="rev">{t('review.comment')}</Label>
+        <textarea id="rev" rows={4} maxLength={1000} value={comment} onChange={(e) => setComment(e.target.value)}
+          placeholder={t('review.placeholder')}
+          className="w-full resize-y rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30" />
+      </div>
+      <Button onClick={() => { if (!comment.trim()) return toast.error(t('review.empty')); save.mutate(); }} disabled={save.isPending}>{t('review.save')}</Button>
+    </CardContent></Card>
   );
 }
 

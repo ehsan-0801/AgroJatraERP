@@ -17,7 +17,7 @@ export const en = {
     groups: { inventory: 'Inventory', crm: 'CRM', transactions: 'Transactions', insights: 'Insights', administration: 'Administration' },
     dashboard: 'Dashboard', products: 'Products', categories: 'Categories', customers: 'Customers',
     suppliers: 'Suppliers', purchases: 'Purchases', sales: 'Sales', reports: 'Reports',
-    accounts: 'Accounts', users: 'Users', roles: 'Roles', settings: 'Settings', profile: 'Profile',
+    accounts: 'Accounts', users: 'Users', roles: 'Roles', settings: 'Settings', review: 'Review', profile: 'Profile',
   },
   roles: { admin: 'Admin', inventory_manager: 'Inventory Manager', sales_manager: 'Sales Manager', accountant: 'Accountant', viewer: 'Viewer' },
   publicNav: { home: 'Home', features: 'Features', about: 'About', contact: 'Contact' },
@@ -182,6 +182,10 @@ export const en = {
   image: {
     upload: 'Upload image', change: 'Change image', uploading: 'Uploading…', hint: 'PNG or JPG. Uploaded when you save.',
   },
+  review: {
+    tab: 'Review', title: 'Rate AgroJatra', subtitle: 'Share a short review — it appears as a testimonial on the public homepage.',
+    rating: 'Rating', comment: 'Your review', placeholder: 'What do you like about AgroJatra?', save: 'Save review', saved: 'Review saved', empty: 'Please write a short review',
+  },
   onboarding: {
     title: 'Create your organization', subtitle: 'Set up your workspace to get started. You can invite up to 5 members.',
     name: 'Organization name', namePlaceholder: 'e.g. Bengal Mart', phone: 'Phone', email: 'Email', address: 'Address',
@@ -228,7 +232,7 @@ export const bn: typeof en = {
     groups: { inventory: 'ইনভেন্টরি', crm: 'সিআরএম', transactions: 'লেনদেন', insights: 'ইনসাইট', administration: 'প্রশাসন' },
     dashboard: 'ড্যাশবোর্ড', products: 'পণ্য', categories: 'ক্যাটাগরি', customers: 'গ্রাহক',
     suppliers: 'সরবরাহকারী', purchases: 'ক্রয়', sales: 'বিক্রয়', reports: 'রিপোর্ট',
-    accounts: 'হিসাব', users: 'ব্যবহারকারী', roles: 'ভূমিকা', settings: 'সেটিংস', profile: 'প্রোফাইল',
+    accounts: 'হিসাব', users: 'ব্যবহারকারী', roles: 'ভূমিকা', settings: 'সেটিংস', review: 'রিভিউ', profile: 'প্রোফাইল',
   },
   roles: { admin: 'অ্যাডমিন', inventory_manager: 'ইনভেন্টরি ম্যানেজার', sales_manager: 'সেলস ম্যানেজার', accountant: 'হিসাবরক্ষক', viewer: 'পর্যবেক্ষক' },
   publicNav: { home: 'হোম', features: 'ফিচার', about: 'পরিচিতি', contact: 'যোগাযোগ' },
@@ -392,6 +396,10 @@ export const bn: typeof en = {
   },
   image: {
     upload: 'ছবি আপলোড করুন', change: 'ছবি পরিবর্তন করুন', uploading: 'আপলোড হচ্ছে…', hint: 'PNG বা JPG। সংরক্ষণ করলে আপলোড হবে।',
+  },
+  review: {
+    tab: 'রিভিউ', title: 'AgroJatra রেটিং দিন', subtitle: 'একটি সংক্ষিপ্ত রিভিউ দিন — এটি পাবলিক হোমপেজে টেস্টিমোনিয়াল হিসেবে দেখানো হবে।',
+    rating: 'রেটিং', comment: 'আপনার রিভিউ', placeholder: 'AgroJatra-এর কী আপনার ভালো লাগে?', save: 'রিভিউ সংরক্ষণ', saved: 'রিভিউ সংরক্ষিত হয়েছে', empty: 'অনুগ্রহ করে একটি সংক্ষিপ্ত রিভিউ লিখুন',
   },
   onboarding: {
     title: 'আপনার প্রতিষ্ঠান তৈরি করুন', subtitle: 'শুরু করতে আপনার ওয়ার্কস্পেস সেট করুন। আপনি সর্বোচ্চ ৫ জন সদস্য যোগ করতে পারবেন।',

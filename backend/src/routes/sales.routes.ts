@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { query, withTransaction } from '../db/pool.js';
+import { computeTotals, dueOf } from '../lib/calc.js';
 import { logActivity } from '../lib/activity.js';
 import { requireAuth } from '../middleware/auth.js';
 import { loadContext, requireOrg, requirePermission } from '../middleware/rbac.js';
@@ -27,11 +28,7 @@ const createSchema = z.object({
   notes: z.string().optional().nullable(),
   items: z.array(itemSchema).min(1),
 });
-const totals = (items: z.infer<typeof itemSchema>[], tax = 0, discount = 0) => {
-  const subtotal = items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
-  return { subtotal, total: subtotal + tax - discount };
-};
-const dueOf = (total: number, paid: number) => Math.max(0, total - paid);
+const totals = (items: z.infer<typeof itemSchema>[], tax = 0, discount = 0) => computeTotals(items, tax, discount);
 
 salesRouter.get(
   '/',

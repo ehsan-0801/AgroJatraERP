@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import { supabaseAdmin, supabaseAnon } from '../config/supabase.js';
 import { query } from '../db/pool.js';
@@ -9,6 +10,15 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const authRouter = Router();
+
+// Throttle sensitive auth endpoints to slow brute-force / abuse (per IP).
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 25,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again in a few minutes.' },
+});
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -28,6 +38,7 @@ async function ensureProfile(userId: string, email: string, fullName?: string) {
  *  onboards their organization via POST /organizations. */
 authRouter.post(
   '/register',
+  authLimiter,
   asyncHandler(async (req, res) => {
     const body = registerSchema.parse(req.body);
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
@@ -52,6 +63,7 @@ authRouter.post(
 /** POST /auth/login */
 authRouter.post(
   '/login',
+  authLimiter,
   asyncHandler(async (req, res) => {
     const body = z.object({ email: z.string().email(), password: z.string().min(1) }).parse(req.body);
     const { data, error } = await supabaseAnon.auth.signInWithPassword(body);
@@ -65,6 +77,7 @@ authRouter.post(
 /** POST /auth/forgot-password */
 authRouter.post(
   '/forgot-password',
+  authLimiter,
   asyncHandler(async (req, res) => {
     const { email } = z.object({ email: z.string().email() }).parse(req.body);
     const origin = req.headers.origin as string | undefined;

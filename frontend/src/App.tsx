@@ -5,6 +5,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OnboardingRoute, ProtectedRoute, RequirePermission, RequireSuperAdmin } from '@/components/layout/ProtectedRoute';
 import { PublicLayout } from '@/components/layout/PublicLayout';
+import { InvoicePage } from '@/components/InvoicePage';
 import { applyContentOverrides } from '@/i18n';
 import { api } from '@/lib/api';
 import { useAuth } from '@/store/auth';
@@ -56,6 +57,9 @@ export default function App() {
     api.get<{ data: { en?: unknown; bn?: unknown; showcase?: { url: string; name?: string }[] } }>('/content')
       .then((r) => { applyContentOverrides(r.data as never); useSiteContent.getState().setShowcase(r.data?.showcase ?? []); })
       .catch(() => {});
+    api.get<{ data: never[] }>('/reviews')
+      .then((r) => useSiteContent.getState().setReviews(r.data ?? []))
+      .catch(() => {});
   }, []);
   useEffect(() => { const t = setTimeout(() => setMinElapsed(true), 700); return () => clearTimeout(t); }, []);
 
@@ -90,6 +94,10 @@ export default function App() {
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="website" element={<AdminContentPage />} />
       </Route>
+
+      {/* Standalone printable documents (clean page, no app chrome) */}
+      <Route path="/sales/:id/invoice" element={<ProtectedRoute><InvoicePage kind="sale" /></ProtectedRoute>} />
+      <Route path="/purchases/:id/invoice" element={<ProtectedRoute><InvoicePage kind="purchase" /></ProtectedRoute>} />
 
       {/* Authenticated app */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

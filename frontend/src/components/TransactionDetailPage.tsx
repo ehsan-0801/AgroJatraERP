@@ -30,7 +30,7 @@ export function TransactionDetailPage({ kind }: { kind: 'purchase' | 'sale' }) {
         breadcrumb={[{ label: isSale ? 'Sales' : 'Purchases', to: listPath }, { label: ref }]}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-2" onClick={() => window.print()}><Printer className="h-4 w-4" /> Print</Button>
+            <Button variant="outline" className="gap-2" onClick={() => navigate(`${listPath}/${id}/invoice`)}><Printer className="h-4 w-4" /> {isSale ? 'Invoice' : 'Print PO'}</Button>
             {canEdit && <Button className="gap-2" onClick={() => navigate(`${listPath}/${id}/edit`)}><Pencil className="h-4 w-4" /> Edit</Button>}
           </div>
         }

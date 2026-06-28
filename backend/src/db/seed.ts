@@ -196,6 +196,19 @@ async function main() {
   console.log('  · Organization 2 "Bengal Mart" with 3 members');
   await seedBusiness(org2, inv2, sales2, 'BM-PO', 'BM-INV', 0.6);
 
+  // ── Reviews (each org admin's testimonial, shown on the homepage) ──
+  const reviews: [string, string, number, string][] = [
+    [org1, adminId, 5, 'AgroJatra made our daily operations effortless — stock stays accurate and the team got productive within a day.'],
+    [org2, owner2, 5, 'Setting up our organization took minutes and inviting the team was simple. The bilingual dashboard is a huge plus.'],
+  ];
+  for (const [orgId, uid, rating, comment] of reviews) {
+    await query(
+      `insert into public.reviews (organization_id, user_id, rating, comment) values ($1,$2,$3,$4)
+       on conflict (organization_id) do update set rating = excluded.rating, comment = excluded.comment`,
+      [orgId, uid, rating, comment]);
+  }
+  console.log('  · 2 reviews');
+
   // Prune any leftover accounts that aren't a super admin and belong to no
   // organization (abandoned signups / old dev users) so resets stay clean.
   const orphans = (await query<{ id: string; email: string }>(

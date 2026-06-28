@@ -14,9 +14,11 @@ import { customersRouter } from './routes/customers.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
 import { insightsRouter } from './routes/insights.routes.js';
 import { organizationsRouter } from './routes/organizations.routes.js';
+import { paymentsRouter } from './routes/payments.routes.js';
 import { productsRouter } from './routes/products.routes.js';
 import { purchasesRouter } from './routes/purchases.routes.js';
 import { reportsRouter } from './routes/reports.routes.js';
+import { reviewsRouter } from './routes/reviews.routes.js';
 import { salesRouter } from './routes/sales.routes.js';
 import { settingsRouter } from './routes/settings.routes.js';
 import { suppliersRouter } from './routes/suppliers.routes.js';
@@ -25,6 +27,7 @@ import { usersRouter } from './routes/users.routes.js';
 
 export function createApp() {
   const app = express();
+  app.set('trust proxy', 1); // behind Render's proxy — needed for correct client IP (rate limiting)
   app.use(helmet());
   app.use(cors({ origin: env.corsOrigins, credentials: true }));
   app.use(express.json({ limit: '2mb' }));
@@ -35,6 +38,7 @@ export function createApp() {
   const api = express.Router();
   api.use('/auth', authRouter);
   api.use('/content', contentRouter);
+  api.use('/reviews', reviewsRouter);
   api.use('/organizations', organizationsRouter);
   api.use('/admin', adminRouter);
   api.use('/dashboard', dashboardRouter);
@@ -44,6 +48,7 @@ export function createApp() {
   api.use('/suppliers', suppliersRouter);
   api.use('/purchases', purchasesRouter);
   api.use('/sales', salesRouter);
+  api.use('/payments', paymentsRouter);
   api.use('/reports', reportsRouter);
   api.use('/accounts', accountsRouter);
   api.use('/users', usersRouter);

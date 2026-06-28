@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { env } from '../config/env.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { query } from '../db/pool.js';
 import { logActivity } from '../lib/activity.js';
+import { emailLayout, sendEmail } from '../lib/email.js';
 import { ROLES, ROLE_LABELS } from '../lib/permissions.js';
 import { requireAuth } from '../middleware/auth.js';
 import { loadContext, requireOrg, requirePermission } from '../middleware/rbac.js';
@@ -82,6 +84,17 @@ usersRouter.post('/', requirePermission('users', 'create'), asyncHandler(async (
      returning user_id as id, role, status`,
     [org, userId, body.role]);
   await logActivity({ organizationId: org, userId: req.user!.id, action: 'created', entity: 'users', entityId: userId, description: `Added member ${body.email} (${body.role})` });
+
+  const orgName = req.ctx!.memberships.find((m) => m.organization_id === org)?.organization_name ?? 'your organization';
+  await sendEmail({
+    to: body.email,
+    subject: `You've been added to ${orgName} on AgroJatra ERP`,
+    html: emailLayout('Welcome to the team', `
+      <p>You've been added to <strong>${orgName}</strong> as <strong>${ROLE_LABELS[body.role]}</strong>.</p>
+      ${existing ? '' : '<p>Your administrator has set up your account. Ask them for your password, or use “Forgot password” on the sign-in page to choose your own.</p>'}
+      <p><a href="${env.email.appUrl}/login" style="display:inline-block;margin-top:8px;padding:10px 16px;background:#10b981;color:#fff;border-radius:8px;text-decoration:none">Sign in</a></p>`),
+  });
+
   res.status(201).json({ data: { ...rows[0], email: body.email, full_name: body.full_name } });
 }));
 

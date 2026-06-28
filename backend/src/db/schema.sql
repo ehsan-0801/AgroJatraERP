@@ -232,6 +232,35 @@ create table if not exists public.activity_logs (
 );
 create index if not exists idx_activity_org on public.activity_logs(organization_id, created_at desc);
 
+-- ─── payments (customer settlements against invoices / outstanding dues) ─────
+create table if not exists public.payments (
+  id              uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  customer_id     uuid references public.customers(id) on delete set null,
+  sale_id         uuid references public.sales(id) on delete set null,
+  amount          numeric(14,2) not null check (amount > 0),
+  method          text not null default 'cash',
+  note            text,
+  paid_at         date not null default current_date,
+  created_by      uuid references auth.users(id) on delete set null,
+  created_at      timestamptz not null default now()
+);
+create index if not exists idx_payments_org on public.payments(organization_id);
+create index if not exists idx_payments_customer on public.payments(customer_id);
+
+-- ─── reviews (one per organization; shown as testimonials on the homepage) ───
+create table if not exists public.reviews (
+  id              uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  user_id         uuid references auth.users(id) on delete set null,
+  rating          smallint not null default 5 check (rating between 1 and 5),
+  comment         text not null,
+  published       boolean not null default true,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now(),
+  unique (organization_id)
+);
+
 -- ─── site_content (super-admin editable public marketing copy overrides) ─────
 create table if not exists public.site_content (
   id         smallint primary key default 1,
@@ -245,7 +274,7 @@ insert into public.site_content (id, data) values (1, '{}'::jsonb) on conflict (
 do $$
 declare t text;
 begin
-  foreach t in array array['users','organizations','memberships','categories','products','customers','suppliers','purchases','sales']
+  foreach t in array array['users','organizations','memberships','categories','products','customers','suppliers','purchases','sales','reviews']
   loop
     execute format('drop trigger if exists trg_%1$s_updated on public.%1$s;', t);
     execute format('create trigger trg_%1$s_updated before update on public.%1$s
